@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html lang="en">
+<head>
+       <meta http-equiv="content-type" content="text/html; charset=utf-8">
+       <title>힐링타임</title>
+       <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" media="screen">
+       <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+       <script src="http://code.jquery.com/jquery-latest.js"></script>
+       <style type="text/css">
+       #wrapper {
+       	position:absolute;
+       	top:50%;
+       	left:50%;
+       	width:106px;
+       	height:106px;
+       	overflow:hidden;
+       	margin-top:-53px;
+       	margin-left:-53px;
+       }
+       .btn {
+       	width: 100px;
+       	height: 50px;
+       	display: block;
+       	margin: 3px;
+       }
+       </style>
+ </head>
+<body>
+	<div id="wrapper">
+		<button onclick='move_show();' class="btn btn-success">Show</button>
+		<button onclick='move_upload();' class="btn btn-info">Upload</button>
+	</div>
+	<script>
+		function move_show(){
+			location.href='show';
+		}
+		function move_upload(){
+			alert('준비중입니다');
+		}
+	</script>
+</body>
+</html>
