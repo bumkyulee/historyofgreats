@@ -12,12 +12,12 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    	return "apache is running"
+    	return "apache is running ok?"
 
 # 사진을 띄워준다
 @app.route("/main")
 def main():
- 	return render_template('main.html')
+ 	return "apache is running _ main"
 
 # 사진을 띄워준다
 @app.route("/img")
