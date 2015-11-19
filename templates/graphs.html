@@ -34,6 +34,12 @@
 			stroke-width: 6;
 		}
 
+		.miniItem3 {
+			fill: red;
+			fill-opacity: .7;
+			stroke-width: 6;
+		}
+
 		.brush .extent {
 			stroke: gray;
 			fill: dodgerblue;
@@ -44,7 +50,7 @@
 	<body>
 		<script type="text/javascript">
 		//data
-		var lanes = ["Chinese","Japanese","Korean"],
+		var lanes = ["Chinese","Japanese","Korean","Mongol"],
 			laneLength = lanes.length,
 			items = [{"lane": 0, "id": "Qin", "start": 5, "end": 205},
 					{"lane": 0, "id": "Jin", "start": 265, "end": 420},
@@ -69,16 +75,26 @@
 					{"lane": 2, "id": "North and South States", "start": 690, "end": 900},
 					{"lane": 2, "id": "Goryeo", "start": 920, "end": 1380},
 					{"lane": 2, "id": "Joseon", "start": 1390, "end": 1890},
-					{"lane": 2, "id": "Korean Empire", "start": 1900, "end": 1945}]
+					{"lane": 2, "id": "Korean Empire", "start": 1900, "end": 1945},
+					{"lane": 3, "id": "Song2", "start": 920, "end": 1565},
+					{"lane": 3, "id": "Yuan2", "start": 1270, "end": 1365}
+					]
 			timeBegin = 0,
 			timeEnd = 2000;
 		</script>
 		<script type="text/javascript">
-		var m = [20, 15, 15, 120], //top right bottom left
-			w = 960 - m[1] - m[3],
-			h = 500 - m[0] - m[2],
+		var w = window,
+		    d = document,
+		    e = d.documentElement,
+		    g = d.getElementsByTagName('body')[0],
+		    screenWidth = w.innerWidth || e.clientWidth || g.clientWidth,
+		    screenHeight = w.innerHeight|| e.clientHeight|| g.clientHeight;
+
+		var m = [0, 30, 0, 80], //top right bottom left
+			w = screenWidth - m[1] - m[3],
+			h = screenHeight - m[0] - m[2],
 			miniHeight = laneLength * 12 + 50,
-			mainHeight = h - miniHeight - 50;
+			mainHeight = h - miniHeight - 30;
 
 		//scales
 		var x = d3.scale.linear()
@@ -157,8 +173,7 @@
 			.attr("text-anchor", "end")
 			.attr("class", "laneText");
 
-		var itemRects = main.append("g")
-							.attr("clip-path", "url(#clip)");
+		var itemRects = main.append("g").attr("clip-path", "url(#clip)");
 
 		//mini item rects
 		mini.append("g").selectAll("miniItems")
