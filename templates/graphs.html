@@ -61,16 +61,39 @@
 	</head>
 	<body>
 		<script type="text/javascript">
+		var data = {{ data|tojson }};
+		var items = new Array();
+		var lanes = new Array();
+		for (var i = data.length - 1; i > 0; i--) {
+			var arrTemp = new Object();
+			arrTemp['depth'] = Number(data[i][4]);
+			arrTemp['lane'] = data[i][3];
+			arrTemp['end'] = Number(data[i][2]);
+			arrTemp['start'] = Number(data[i][1]);
+			arrTemp['id'] = data[i][0];
+			items.push(arrTemp);
+			if(lanes.indexOf(data[i][3]) == -1) {
+				lanes.push(data[i][3]);
+			}
+		};
+		alert(JSON.stringify(items));
+		alert(JSON.stringify(lanes));
+
+		var laneLength = lanes.length,
+			timeBegin = 0,
+			timeEnd = 2015;
+
 		//data
+		/*
 		var lanes = ["Chinese","Japanese","Korean","Mongol"],
 			laneLength = lanes.length,
 			items = [{"lane": "Chinese", "id": "Qin", "start": 5, "end": 205, "depth":1},
-					{"lane": "Chinese", "id": "Jin", "start": 265, "end": 420, "depth":2},
-					{"lane": "Chinese", "id": "Sui", "start": 580, "end": 615, "depth":3},
-					{"lane": "Chinese", "id": "Tang", "start": 620, "end": 900, "depth":1},
-					{"lane": "Chinese", "id": "Song", "start": 960, "end": 1265, "depth":2},
-					{"lane": "Chinese", "id": "Yuan", "start": 1270, "end": 1365, "depth":3},
-					{"lane": "Chinese", "id": "Ming", "start": 1370, "end": 1640, "depth":2},
+					{"lane": "Chinese", "id": "Jin", "start": 265, "end": 420, "depth":1},
+					{"lane": "Chinese", "id": "Sui", "start": 580, "end": 615, "depth":1},
+					{"lane": "Chinese", "id": "Tang", "start": 620, "end": 900, "depth":2},
+					{"lane": "Chinese", "id": "Song", "start": 960, "end": 1265, "depth":1},
+					{"lane": "Chinese", "id": "Yuan", "start": 1270, "end": 1365, "depth":1},
+					{"lane": "Chinese", "id": "Ming", "start": 1370, "end": 1640, "depth":1},
 					{"lane": "Chinese", "id": "Qing", "start": 1645, "end": 1910, "depth":1},
 					{"lane": "Japanese", "id": "Yamato", "start": 300, "end": 530, "depth":1},
 					{"lane": "Japanese", "id": "Asuka", "start": 550, "end": 700, "depth":2},
@@ -92,7 +115,8 @@
 					{"lane": "Mongol", "id": "Yuan2", "start": 1270, "end": 1365, "depth":2}
 					]
 			timeBegin = 0,
-			timeEnd = 2000;
+			timeEnd = 2015;
+		*/
 		// 국가의 순서 구하기
 		function getNationalitySeq(nationality){
 			return lanes.indexOf(nationality);
