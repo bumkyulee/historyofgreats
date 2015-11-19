@@ -32,7 +32,10 @@ def connect():
 
 @app.route("/test")
 def test():
-	return render_template('graphs.html')
+	return findPeriod('')
+
+def findPeriod(schName):
+	return 'nothing'
 
 if __name__ == "__main__":
  	app.run('0.0.0.0',8080,debug=True)
