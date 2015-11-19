@@ -26,10 +26,13 @@ def connect():
 	#sht  = gc.open("historyofgreats")
 	sht = gc.open_by_url('https://docs.google.com/spreadsheets/d/1MpGW0Hi54_EiIRu-Sx2t1vOgK06p7Hf4ZpWwn4ssHgA/edit')
 	worksheet = sht.worksheet("sheet1")
-	worksheet.update_acell('B1', 'Bingo!')
-	return "it is connected"
+	data = worksheet.get_all_values()
 
+	return render_template('graphs.html',data=data)
 
+@app.route("/test")
+def test():
+	return render_template('graphs.html')
 
 if __name__ == "__main__":
  	app.run('0.0.0.0',8080,debug=True)
