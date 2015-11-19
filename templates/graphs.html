@@ -35,7 +35,19 @@
 		}
 
 		.miniItem3 {
-			fill: red;
+			fill: gray;
+			fill-opacity: .7;
+			stroke-width: 6;
+		}
+
+		.miniItem4 {
+			fill: lightblue;
+			fill-opacity: .7;
+			stroke-width: 6;
+		}
+
+		.miniItem5 {
+			fill: darkred;
 			fill-opacity: .7;
 			stroke-width: 6;
 		}
@@ -52,35 +64,80 @@
 		//data
 		var lanes = ["Chinese","Japanese","Korean","Mongol"],
 			laneLength = lanes.length,
-			items = [{"lane": 0, "id": "Qin", "start": 5, "end": 205},
-					{"lane": 0, "id": "Jin", "start": 265, "end": 420},
-					{"lane": 0, "id": "Sui", "start": 580, "end": 615},
-					{"lane": 0, "id": "Tang", "start": 620, "end": 900},
-					{"lane": 0, "id": "Song", "start": 960, "end": 1265},
-					{"lane": 0, "id": "Yuan", "start": 1270, "end": 1365},
-					{"lane": 0, "id": "Ming", "start": 1370, "end": 1640},
-					{"lane": 0, "id": "Qing", "start": 1645, "end": 1910},
-					{"lane": 1, "id": "Yamato", "start": 300, "end": 530},
-					{"lane": 1, "id": "Asuka", "start": 550, "end": 700},
-					{"lane": 1, "id": "Nara", "start": 710, "end": 790},
-					{"lane": 1, "id": "Heian", "start": 800, "end": 1180},
-					{"lane": 1, "id": "Kamakura", "start": 1190, "end": 1330},
-					{"lane": 1, "id": "Muromachi", "start": 1340, "end": 1560},
-					{"lane": 1, "id": "Edo", "start": 1610, "end": 1860},
-					{"lane": 1, "id": "Meiji", "start": 1870, "end": 1900},
-					{"lane": 1, "id": "Taisho", "start": 1910, "end": 1920},
-					{"lane": 1, "id": "Showa", "start": 1925, "end": 1985},
-					{"lane": 1, "id": "Heisei", "start": 1990, "end": 1995},
-					{"lane": 2, "id": "Three Kingdoms", "start": 10, "end": 670},
-					{"lane": 2, "id": "North and South States", "start": 690, "end": 900},
-					{"lane": 2, "id": "Goryeo", "start": 920, "end": 1380},
-					{"lane": 2, "id": "Joseon", "start": 1390, "end": 1890},
-					{"lane": 2, "id": "Korean Empire", "start": 1900, "end": 1945},
-					{"lane": 3, "id": "Song2", "start": 920, "end": 1565},
-					{"lane": 3, "id": "Yuan2", "start": 1270, "end": 1365}
+			items = [{"lane": "Chinese", "id": "Qin", "start": 5, "end": 205, "depth":1},
+					{"lane": "Chinese", "id": "Jin", "start": 265, "end": 420, "depth":2},
+					{"lane": "Chinese", "id": "Sui", "start": 580, "end": 615, "depth":3},
+					{"lane": "Chinese", "id": "Tang", "start": 620, "end": 900, "depth":1},
+					{"lane": "Chinese", "id": "Song", "start": 960, "end": 1265, "depth":2},
+					{"lane": "Chinese", "id": "Yuan", "start": 1270, "end": 1365, "depth":3},
+					{"lane": "Chinese", "id": "Ming", "start": 1370, "end": 1640, "depth":2},
+					{"lane": "Chinese", "id": "Qing", "start": 1645, "end": 1910, "depth":1},
+					{"lane": "Japanese", "id": "Yamato", "start": 300, "end": 530, "depth":1},
+					{"lane": "Japanese", "id": "Asuka", "start": 550, "end": 700, "depth":2},
+					{"lane": "Japanese", "id": "Nara", "start": 710, "end": 790, "depth":3},
+					{"lane": "Japanese", "id": "Heian", "start": 800, "end": 1180, "depth":4},
+					{"lane": "Japanese", "id": "Kamakura", "start": 1190, "end": 1330, "depth":5},
+					{"lane": "Japanese", "id": "Muromachi", "start": 1340, "end": 1560, "depth":6},
+					{"lane": "Japanese", "id": "Edo", "start": 1610, "end": 1860, "depth":7},
+					{"lane": "Japanese", "id": "Meiji", "start": 1870, "end": 1900, "depth":1},
+					{"lane": "Japanese", "id": "Taisho", "start": 1910, "end": 1920, "depth":2},
+					{"lane": "Japanese", "id": "Showa", "start": 1925, "end": 1985, "depth":3},
+					{"lane": "Japanese", "id": "Heisei", "start": 1990, "end": 1995, "depth":4},
+					{"lane": "Korean", "id": "Three Kingdoms", "start": 10, "end": 670, "depth":1},
+					{"lane": "Korean", "id": "North and South States", "start": 690, "end": 900, "depth":2},
+					{"lane": "Korean", "id": "Goryeo", "start": 920, "end": 1380, "depth":3},
+					{"lane": "Korean", "id": "Joseon", "start": 1390, "end": 1890, "depth":4},
+					{"lane": "Korean", "id": "Korean Empire", "start": 1900, "end": 1945, "depth":1},
+					{"lane": "Mongol", "id": "Song2", "start": 920, "end": 1565, "depth":1},
+					{"lane": "Mongol", "id": "Yuan2", "start": 1270, "end": 1365, "depth":2}
 					]
 			timeBegin = 0,
 			timeEnd = 2000;
+		// 국가의 순서 구하기
+		function getNationalitySeq(nationality){
+			return lanes.indexOf(nationality);
+		}
+		// 국가 별 데이터 개수 구하기
+		function getNationalityCnt(nationality){
+			var count = 0;
+			for (var i = items.length - 1; i >= 0; i--) {
+				if (items[i].lane == nationality) {  count++; }
+			}
+			return count;
+		}
+		// 국가별 미니스타일 아이템 번호 구하기
+		function getMiniItemNo(nationality){
+			return 'miniItem'+getNationalitySeq(nationality);
+		}
+		// Max Depth 구하기
+		function getMaxDepth(nationality){
+			var maxDepth = 1;
+			for (var i = items.length - 1; i >= 0; i--) {
+				if (items[i].lane == nationality) {
+					if (maxDepth < items[i].depth){
+						maxDepth = items[i].depth;
+					}
+				}
+			}
+			return maxDepth;
+		}
+		// Depth의 총 합 구하기
+		function getSumMaxDepth(){
+			var sum = 0;
+			for (var i = lanes.length - 1; i >= 0; i--) {
+				sum += getMaxDepth(lanes[i]);
+			}
+			return sum;
+		}
+		// 이 전까지의 Depth 구하기
+		function getSumBeginDepth(nationality){
+			var sumDepth = 0;
+			for (var i = lanes.length - 1; i >= 0; i--) {
+				if (lanes[i] == nationality) { break; };
+				sumDepth += getMaxDepth(lanes[i]);
+			};
+			return sumDepth;
+		}
 		</script>
 		<script type="text/javascript">
 		var w = window,
@@ -96,18 +153,28 @@
 			miniHeight = laneLength * 12 + 50,
 			mainHeight = h - miniHeight - 30;
 
+		// 유닛 높이 구하기
+		var mainHeightUnit = mainHeight / getSumMaxDepth();
+		var miniHeightUnit = miniHeight / getSumMaxDepth();
+
 		//scales
 		var x = d3.scale.linear()
 				.domain([timeBegin, timeEnd])
 				.range([0, w]);
 		var x1 = d3.scale.linear()
 				.range([0, w]);
+		/*
 		var y1 = d3.scale.linear()
 				.domain([0, laneLength])
 				.range([0, mainHeight]);
 		var y2 = d3.scale.linear()
 				.domain([0, laneLength])
 				.range([0, miniHeight]);
+		*/
+		var y1 = function(nationality) { return mainHeightUnit*(getMaxDepth(nationality) + getSumBeginDepth(nationality)); };
+		var y2 = function(nationality) { return miniHeightUnit*(getMaxDepth(nationality) + getSumBeginDepth(nationality)); };
+		var y1_label = function(nationality) { return mainHeightUnit*(getMaxDepth(nationality)/2+ getSumBeginDepth(nationality)); }
+		var y2_label = function(nationality) { return miniHeightUnit*(getMaxDepth(nationality)/2+ getSumBeginDepth(nationality)); }
 
 		var chart = d3.select("body")
 					.append("svg")
@@ -132,7 +199,6 @@
 					.attr("width", w)
 					.attr("height", miniHeight)
 					.attr("class", "mini");
-
 		//main lanes and texts
 		main.append("g").selectAll(".laneLines")
 			.data(items)
@@ -148,7 +214,7 @@
 			.enter().append("text")
 			.text(function(d) {return d;})
 			.attr("x", -m[1])
-			.attr("y", function(d, i) {return y1(i + .5);})
+			.attr("y", function(d, i) {return y1_label(d);})
 			.attr("dy", ".5ex")
 			.attr("text-anchor", "end")
 			.attr("class", "laneText");
@@ -168,7 +234,7 @@
 			.enter().append("text")
 			.text(function(d) {return d;})
 			.attr("x", -m[1])
-			.attr("y", function(d, i) {return y2(i + .5);})
+			.attr("y", function(d, i) {return y2_label(d);})
 			.attr("dy", ".5ex")
 			.attr("text-anchor", "end")
 			.attr("class", "laneText");
@@ -179,11 +245,11 @@
 		mini.append("g").selectAll("miniItems")
 			.data(items)
 			.enter().append("rect")
-			.attr("class", function(d) {return "miniItem" + d.lane;})
+			.attr("class", function(d) {return getMiniItemNo(d.lane);})
 			.attr("x", function(d) {return x(d.start);})
-			.attr("y", function(d) {return y2(d.lane + .5) - 5;})
+			.attr("y", function(d) {return (getSumBeginDepth(d.lane)+d.depth-1)*miniHeightUnit;})
 			.attr("width", function(d) {return x(d.end - d.start);})
-			.attr("height", 10);
+			.attr("height", miniHeightUnit);
 
 		//mini labels
 		mini.append("g").selectAll(".miniLabels")
@@ -191,7 +257,7 @@
 			.enter().append("text")
 			.text(function(d) {return d.id;})
 			.attr("x", function(d) {return x(d.start);})
-			.attr("y", function(d) {return y2(d.lane + .5);})
+			.attr("y", function(d) {return (getSumBeginDepth(d.lane)+d.depth-1)*miniHeightUnit;})
 			.attr("dy", ".5ex");
 
 		//brush
@@ -226,11 +292,11 @@
 				.attr("width", function(d) {return x1(d.end) - x1(d.start);});
 
 			rects.enter().append("rect")
-				.attr("class", function(d) {return "miniItem" + d.lane;})
+				.attr("class", function(d) {return getMiniItemNo(d.lane);})
 				.attr("x", function(d) {return x1(d.start);})
-				.attr("y", function(d) {return y1(d.lane) + 10;})
+				.attr("y", function(d) {return  mainHeightUnit*(getSumBeginDepth(d.lane)+d.depth-1); })
 				.attr("width", function(d) {return x1(d.end) - x1(d.start);})
-				.attr("height", function(d) {return .8 * y1(1);});
+				.attr("height", function(d) {return .9 * mainHeightUnit;});
 
 			rects.exit().remove();
 
@@ -240,9 +306,9 @@
 				.attr("x", function(d) {return x1(Math.max(d.start, minExtent) + 2);});
 
 			labels.enter().append("text")
-				.text(function(d) {return d.id;})
+				.text(function(d) {return d.id + " (" + d.start + "~"+d.end+") ";})
 				.attr("x", function(d) {return x1(Math.max(d.start, minExtent));})
-				.attr("y", function(d) {return y1(d.lane + .5);})
+				.attr("y", function(d) {return mainHeightUnit*(getSumBeginDepth(d.lane)+d.depth-0.5);  })
 				.attr("text-anchor", "start");
 
 			labels.exit().remove();
