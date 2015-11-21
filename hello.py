@@ -8,7 +8,6 @@ import json
 
 import urllib2
 from BeautifulSoup import BeautifulSoup
-import pprint
 import random
 
 app = Flask(__name__)
@@ -80,7 +79,7 @@ def findPeriod(schName):
 
 		return '완료 :' + birth + '~' +death + ' / ' + '랜덤하게 ' + nationality + '인이 되었습니다'
 	except:
-		return '오류가 발생했지만 시작이 부족하여 잡지 못했습니다'
+		return '오류가 발생했지만 시간이 부족하여 잡지 못했습니다'
 
 def update_one(schName):
 	try:
@@ -106,6 +105,49 @@ def update_one(schName):
 	except:
 		value = [0,0,0,0]
 		return value
+
+
+@app.route("/getinfo/<schName>")
+def getinfo(schName):
+	try:
+		opener = urllib2.build_opener()
+		opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+		url = 'http://ko.wikipedia.org/wiki/'+schName.encode('utf-8')
+		page = opener.open(url)
+	       	soup = BeautifulSoup(page)
+	       	infobox = soup.find('table').findAll('tr')
+	       	birth = 0
+	       	death = 0
+	       	nationality = ''
+
+	       	birth_strs = ['출생']
+	       	death_strs = ['사망']
+	       	nationality_strs = ['왕조','국적','출생지']
+
+	       	#getFullName
+	       	name = soup.find('h1',attrs={'id':'firstHeading'}).text
+
+	       	#InfoBox parsing
+	       	for data in infobox:
+	       		label = data.find('th')
+	       		if label is not None:
+	       			text = label.text.encode('utf-8')
+		       		if findString(text,birth_strs) and birth == 0:
+		       			birth = data.td.text.split(u'년')[0]
+		       		elif findString(text,death_strs) and death == 0:
+		       			death = data.td.text.split(u'년')[0]
+		       		elif findString(text,nationality_strs) and nationality == '':
+		       			nationality = data.td.a is not None and data.td.a.text or '미정'
+		       		else:
+		       			pass
+		value = [birth,death,nationality]
+		return json.dumps(value)
+	except:
+		value = [0,0,'none']
+		return json.dumps(value)
+
+def findString(text,strs):
+	return any(x in text for x in strs)
 
 @app.route("/findperiod_all")
 def findPeriod_all():
