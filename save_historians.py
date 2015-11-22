@@ -1,4 +1,4 @@
-# coding: utf-8
+#-*- coding: utf-8 -*-
 from flask import Flask
 from flask import render_template
 
@@ -37,8 +37,7 @@ def setWorkSheet():
 
 # 열 단위로 업데이트한다. 열 이름: A,B,C,D,E
 def setColumn(col,values,name):
-	setWorkSheet()
-
+	print 'start: setColumn: ' + col
 	if not isinstance(values,list):
 		print 'fail : values is not a list'
 		return
@@ -56,11 +55,15 @@ def setColumn(col,values,name):
 	#데이터셀
 	cell_list = worksheet.range(startCell+':'+endCell)
 
+	#테스트용
+	print values
+
 	for cell in cell_list:
+		print 'cell row: ' + str(cell.row) + ' / ' + values[cell.row-2]
 		cell.value = values[cell.row-2]
 
 	worksheet.update_cells(cell_list)
-	print 'done: setColumn'
+	print 'done: setColumn: ' + col
 
 # 다음 인물 카테고리 페이지를 파싱한다.
 def getUrls_Categories():
@@ -85,7 +88,7 @@ def getInfos_Person(url):
 		soup = getSoup(url)
 		name = soup.find('h3',attrs={'class':'tit_desc'}).text
 		desc = soup.find('strong',attrs={'class':'tit_other'})
-		desc = desc.text if desc is not None else ''
+		desc = desc.text.encode('utf-8').replace('\t'.'').replace('  '.'') if desc is not None else ''
 
 		birth = 0
 		death = 0
@@ -96,19 +99,31 @@ def getInfos_Person(url):
 				if row.td.text.encode('utf-8').find('BC') >= 0:
 					birth = row.td.text.encode('utf-8').replace('BC ',''),replace('.',' ').split(' ')[0]
 				else:
-					birth = row.td.text.encode('utf-8').replace('년',' ').split(' ')[0]
+					birth = row.td.text.encode('utf-8').replace('년',' ').replace('(',' ').replace('.',' ').split(' ')[0]
 			elif row.span.text.encode('utf-8') == '사망' :
 				if row.td.text.encode('utf-8').find('BC') >= 0:
 					death = row.td.text.encode('utf-8').replace('BC ',''),replace('.',' ').split(' ')[0]
 				else:
-					death = row.td.text.encode('utf-8').replace('년',' ').split(' ')[0]
+					death = row.td.text.encode('utf-8').replace('년',' ').replace('(',' ').replace('.',' ').split(' ')[0]
+					if death.encode('utf-8') == '현재':
+						death = 2015
 			elif row.span.text.encode('utf-8') == '국적' :
 				nationality = row.td.text.encode('utf-8')
 
 		values = [name,desc,str(birth),str(death),nationality]
+	#요약 박스가 없을 때
 	except:
-		values = [name,'error',0,0,'error']
+		values = [name,'error','0','0','error']
 	return values
+
+# 출생, 사망 연도를 파싱한다.
+def getYear(text):
+	year = replace('년',' ').replace('(',' ').replace('.',' ').split(' ')[0]
+	if not isinstance(year,int):
+		raise Exception
+	else:
+		return year
+
 
 # 마지막페이지인지 구별한다.
 def checkEndPage(url):
@@ -133,36 +148,39 @@ def getAll():
 
 	#카테고리 파싱
 	urls_categories = getUrls_Categories()
-	for url_category in urls_categories:
+	for url_category_base in urls_categories:
+		print '카테고리 페이지 시작:' + url_category_base.encode('utf-8')
 		page = 0
-		# 테스트용
-		if count > 10:
-			break
-		#카테고리 내 페이지 파싱
 		while True:
-			# 테스트용
-			if count > 10:
+			if count > 50:
+				print '테스트로 인한 브레이크'
 				break
 			page += 1
-			url_category = url_category+'?page='+str(page)
+			url_category = url_category_base+'?page='+str(page)
+			#마지막페이지 일 경우 브레이크
 			if checkEndPage(url_category):
+				print '컨텐츠 페이지 없음:' + url_category.encode('utf-8')
 				break
+			else:
+				print '컨텐츠 페이지 시작:' + url_category.encode('utf-8')
 			#인물 파싱
 			urls_people = getUrls_People(url_category)
 			for url_person in urls_people:
 					values = getInfos_Person(url_person)
-					name.append(values[0])
-					desc.append(values[1])
-					birth.append(values[2])
-					death.append(values[3])
-					nationality.append(values[4])
-					depth.append(str(random.randrange(1,10)))
-					count += 1
 					if values[1] == 'error':
 						print str(count) + '번째, 저장 실패: ' + url_person.encode('utf-8')
 					else:
-						print str(count)+' 개 저장 완료'
-						print values
+						name.append(values[0])
+						desc.append(values[1])
+						birth.append(values[2])
+						death.append(values[3])
+						nationality.append(values[4])
+						depth.append(str(random.randrange(1,10)))
+						print str(count)+' 개 저장 완료' + json.dumps(values)
+					count += 1
+
+	# 스프레드시트 부르기
+	setWorkSheet()
 
 	# 스프레드시트 저장
 	setColumn('A',name,'name')
@@ -174,5 +192,5 @@ def getAll():
 
 	return 'Success: ' + str(count)
 
-
+getAll()
 
