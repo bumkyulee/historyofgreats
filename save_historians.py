@@ -168,7 +168,7 @@ def deleteMongo():
 	db.info.remove({})
 
 # 전체 인물 정보를 파싱한다.
-def getAll():
+def getAll(url=None,clean=False):
 	count = 0
 	name = list()
 	desc = list()
@@ -179,11 +179,17 @@ def getAll():
 	url_personal = list()
 
 	#몽고디비 열기
-	deleteMongo()
+	if clean:
+		deleteMongo()
 	openMongo()
 
-	#카테고리 파싱
-	urls_categories = getUrls_Categories()
+	if url is None:
+		#카테고리 파싱
+		urls_categories = getUrls_Categories()
+	else:
+		#만약 url이 들어오면
+		urls_categories = [url]
+
 	for url_category_base in urls_categories:
 		print '카테고리 페이지 시작:' + url_category_base.encode('utf-8')
 		page = 0
@@ -215,16 +221,17 @@ def getAll():
 						print str(count)+' 개 저장 완료' + json.dumps(values)
 		break
 	# 스프레드시트 부르기
-	setWorkSheet()
+	#setWorkSheet()
 
 	# 스프레드시트 저장
-	setColumn('A',name,'name')
-	setColumn('B',birth,'birth')
-	setColumn('C',death,'death')
-	setColumn('D',nationality,'nationality')
-	setColumn('E',depth,'depth')
-	setColumn('F',desc,'desc')
-	setColumn('G',url_personal,'url')
+	#setColumn('A',name,'name')
+	#setColumn('B',birth,'birth')
+	#setColumn('C',death,'death')
+	#setColumn('D',nationality,'nationality')
+	#setColumn('E',depth,'depth')
+	#setColumn('F',desc,'desc')
+	#setColumn('G',url_personal,'url')
+	copyMongoToSheet()
 
 	return 'Success: ' + str(count)
 
@@ -262,4 +269,19 @@ def copyMongoToSheet():
 	setColumn('F',desc,'desc')
 	setColumn('G',url_personal,'url')
 
+# Depth 값을 하나씩 업데이트 한다.
+def setDepth():
+	#몽고디비 부르기
+	openMongo()
+	depth = 1
+	#하나씩 꺼내기
+	for row in collection.find():
+		birth = row['birth']
+		objectId = row['_id']
+		for other in collection.find()
 
+
+###### [ 시작 ] #####
+#url = 'http://100.daum.net/book/187/list' ## 세계사 100인
+#url = 'http://100.daum.net/book/130/list' ## 한국사
+#getAll(url)

@@ -32,7 +32,7 @@ def connect():
 	worksheet = sht.worksheet("sheet1")
 	data = worksheet.get_all_values()
 
-	return render_template('graphs.html',data=data)
+	return render_template('graphs_clean.html',data=data)
 
 @app.route("/findperiod/<schName>")
 def findPeriod(schName):
