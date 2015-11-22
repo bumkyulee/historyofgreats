@@ -10,6 +10,9 @@ import urllib2
 from BeautifulSoup import BeautifulSoup
 import random
 import string
+import sys
+
+from pymongo import MongoClient
 
 def getSoup(url):
 	opener = urllib2.build_opener()
@@ -84,11 +87,11 @@ def getUrls_People(url):
 
 # 인물 정보를 파싱한다.
 def getInfos_Person(url):
+	soup = getSoup(url)
+	name = soup.find('h3',attrs={'class':'tit_desc'}).text
 	try:
-		soup = getSoup(url)
-		name = soup.find('h3',attrs={'class':'tit_desc'}).text
 		desc = soup.find('strong',attrs={'class':'tit_other'})
-		desc = desc.text.encode('utf-8').replace('\t'.'').replace('  '.'') if desc is not None else ''
+		desc = desc.text.encode('utf-8').replace('\t','').replace('  ','').decode('utf-8') if desc is not None else ''
 
 		birth = 0
 		death = 0
@@ -96,19 +99,11 @@ def getInfos_Person(url):
 
 		for row in soup.find('table',attrs={'class':'list_summary'}).findAll('tr'):
 			if row.span.text.encode('utf-8') == '출생' :
-				if row.td.text.encode('utf-8').find('BC') >= 0:
-					birth = row.td.text.encode('utf-8').replace('BC ',''),replace('.',' ').split(' ')[0]
-				else:
-					birth = row.td.text.encode('utf-8').replace('년',' ').replace('(',' ').replace('.',' ').split(' ')[0]
+				birth = getYear(row.td.text.encode('utf-8'),'birth')
 			elif row.span.text.encode('utf-8') == '사망' :
-				if row.td.text.encode('utf-8').find('BC') >= 0:
-					death = row.td.text.encode('utf-8').replace('BC ',''),replace('.',' ').split(' ')[0]
-				else:
-					death = row.td.text.encode('utf-8').replace('년',' ').replace('(',' ').replace('.',' ').split(' ')[0]
-					if death.encode('utf-8') == '현재':
-						death = 2015
+				death = getYear(row.td.text.encode('utf-8'),'death')
 			elif row.span.text.encode('utf-8') == '국적' :
-				nationality = row.td.text.encode('utf-8')
+				nationality = row.td.text.encode('utf-8').replace(',','').replace('(','').split(' ')[0].decode('utf-8')
 
 		values = [name,desc,str(birth),str(death),nationality]
 	#요약 박스가 없을 때
@@ -117,24 +112,60 @@ def getInfos_Person(url):
 	return values
 
 # 출생, 사망 연도를 파싱한다.
-def getYear(text):
-	year = replace('년',' ').replace('(',' ').replace('.',' ').split(' ')[0]
-	if not isinstance(year,int):
-		raise Exception
+def getYear(text,bdtype):
+	if text.find('BC') >=0:
+		year = text.replace('BC ','').replace('(',' ').replace(',',' ').replace('.',' ').replace('/',' ').split(' ')[0]
+		year = '-1'+year
 	else:
+		year = text.replace('년',' ').replace('(',' ').replace(',',' ').replace('.',' ').replace('/',' ').split(' ')[0]
+	if bdtype == 'death' and str(year) == '현재':
+		year = '2015'
+	try:
+		year = int(year)
 		return year
-
+	except:
+		print '연도 파싱 불가:' + text
+		raise Exception
 
 # 마지막페이지인지 구별한다.
 def checkEndPage(url):
 	try:
 		soup = getSoup(url)
 	except:
+		# URL이 없을 때
 		return True
-	if soup.find('span').text.encode('utf-8').find('없음') is None:
+	if not soup.find('strong',attrs={'class':'tit_nosubject'}) is None:
+		# 페이지가 없음
 		return True
 	else:
 		return False
+
+# 몽고디비 열기
+def openMongo():
+	global db
+	global collection
+
+	client = MongoClient()
+	client = MongoClient('localhost', 27017)
+
+	db = client.historyofgreats
+	collection = db.info
+
+# 몽고디비 저장
+def saveMongo(count,name,birth,death,nationality,depth,desc,url,parent_url):
+	data = {"count":count,"name":name,"birth":birth,"death":death,"nationality":nationality,"depth":depth,"desc":desc,"url":url,"parent_url":parent_url}
+	collection.insert(data)
+
+# 몽고디비 데이터 확인
+def printMongo():
+	openMongo()
+	for doc in collection.find():
+        		print doc
+
+# 몽고디비 데이터 삭제
+def deleteMongo():
+	openMongo()
+	db.info.remove({})
 
 # 전체 인물 정보를 파싱한다.
 def getAll():
@@ -145,6 +176,11 @@ def getAll():
 	death = list()
 	nationality = list()
 	depth = list()
+	url_personal = list()
+
+	#몽고디비 열기
+	deleteMongo()
+	openMongo()
 
 	#카테고리 파싱
 	urls_categories = getUrls_Categories()
@@ -152,9 +188,6 @@ def getAll():
 		print '카테고리 페이지 시작:' + url_category_base.encode('utf-8')
 		page = 0
 		while True:
-			if count > 50:
-				print '테스트로 인한 브레이크'
-				break
 			page += 1
 			url_category = url_category_base+'?page='+str(page)
 			#마지막페이지 일 경우 브레이크
@@ -166,6 +199,7 @@ def getAll():
 			#인물 파싱
 			urls_people = getUrls_People(url_category)
 			for url_person in urls_people:
+					count += 1
 					values = getInfos_Person(url_person)
 					if values[1] == 'error':
 						print str(count) + '번째, 저장 실패: ' + url_person.encode('utf-8')
@@ -176,9 +210,10 @@ def getAll():
 						death.append(values[3])
 						nationality.append(values[4])
 						depth.append(str(random.randrange(1,10)))
+						url_personal.append(url_person)
+						saveMongo(count,values[0],values[2],values[3],values[4],'',values[1],url_person,url_category)
 						print str(count)+' 개 저장 완료' + json.dumps(values)
-					count += 1
-
+		break
 	# 스프레드시트 부르기
 	setWorkSheet()
 
@@ -189,8 +224,42 @@ def getAll():
 	setColumn('D',nationality,'nationality')
 	setColumn('E',depth,'depth')
 	setColumn('F',desc,'desc')
+	setColumn('G',url_personal,'url')
 
 	return 'Success: ' + str(count)
 
-getAll()
+# 몽고디비에 있는 데이터를 저장한다.
+def copyMongoToSheet():
+	#몽고디비 부르기
+	openMongo()
+
+	count = list()
+	name = list()
+	desc = list()
+	birth = list()
+	death = list()
+	nationality = list()
+	depth = list()
+	url_personal = list()
+
+	for doc in collection.find():
+		count.append(doc['count'])
+		name.append(doc['name'])
+		desc.append(doc['desc'])
+		birth.append(doc['birth'])
+		death.append(doc['death'])
+		nationality.append(doc['nationality'])
+		depth.append(str(random.randrange(1,10)))
+		url_personal.append(doc['url'])
+
+	# 스프레드시트 부르기
+	setWorkSheet()
+	setColumn('A',name,'name')
+	setColumn('B',birth,'birth')
+	setColumn('C',death,'death')
+	setColumn('D',nationality,'nationality')
+	setColumn('E',depth,'depth')
+	setColumn('F',desc,'desc')
+	setColumn('G',url_personal,'url')
+
 

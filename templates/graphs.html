@@ -130,7 +130,7 @@
 		}
 		// 국가별 미니스타일 아이템 번호 구하기
 		function getMiniItemNo(nationality){
-			return 'miniItem'+getNationalitySeq(nationality);
+			return 'miniItem'+getNationalitySeq(nationality)%6;
 		}
 		// Max Depth 구하기
 		function getMaxDepth(nationality){
@@ -170,10 +170,13 @@
 		    screenWidth = w.innerWidth || e.clientWidth || g.clientWidth,
 		    screenHeight = w.innerHeight|| e.clientHeight|| g.clientHeight;
 
+		    screenWidth = 2000
+		    screenHeight = 8000
+
 		var m = [0, 30, 0, 80], //top right bottom left
 			w = screenWidth - m[1] - m[3],
 			h = screenHeight - m[0] - m[2],
-			miniHeight = laneLength * 12 + 50,
+			miniHeight = laneLength * 5 + 50,
 			mainHeight = h - miniHeight - 30;
 
 		// 유닛 높이 구하기
