@@ -279,7 +279,7 @@
 				.append("text")
 				.text(function(d) {return d.id + " (" + d.start + "~"+d.end+") ";})
 				.attr("x", function(d) {return x1(Math.max(d.start+2, minExtent));})
-				.attr("y", function(d) {return mainHeightUnit*(getSumBeginDepth(d.lane)+d.depth-0.5);  })
+				.attr("y", function(d) {return mainHeightUnit*(getSumBeginDepth(d.lane)+d.depth-0.25);  })
 				.attr("text-anchor", "start");
 
 			labels.exit().remove();
