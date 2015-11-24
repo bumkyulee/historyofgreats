@@ -269,18 +269,6 @@ def copyMongoToSheet():
 	setColumn('F',desc,'desc')
 	setColumn('G',url_personal,'url')
 
-# Depth 값을 하나씩 업데이트 한다.
-def setDepth():
-	#몽고디비 부르기
-	openMongo()
-	depth = 1
-	#하나씩 꺼내기
-	for row in collection.find():
-		birth = row['birth']
-		objectId = row['_id']
-		for other in collection.find()
-
-
 ###### [ 시작 ] #####
 #url = 'http://100.daum.net/book/187/list' ## 세계사 100인
 #url = 'http://100.daum.net/book/130/list' ## 한국사

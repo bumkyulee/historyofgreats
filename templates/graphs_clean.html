@@ -73,10 +73,20 @@
 				lanes.push(data[i][3]);
 			}
 		};
-
 		var laneLength = lanes.length,
-			timeBegin = 0,
-			timeEnd = 2015;
+			timeBegin = 200,
+			timeEnd = 2015,
+			lineSplit = 100;
+
+		var laneVertical = function(){
+			var lv = new Array();
+			minYear = timeBegin - timeBegin % lineSplit + lineSplit; // 223 년 -> 300 년
+			maxYear = timeEnd - timeEnd%lineSplit; // 1928 년 -> 1900 년
+			for (var i = minYear; i <= maxYear; i = i + lineSplit) {
+				lv.push(i);
+			};
+			return lv;
+		}
 
 		// 설명
 		var msg = '1. 누구랑 누구랑 같은 시대에 살았을까요?\n';
@@ -85,40 +95,6 @@
 		      msg += '4. 추가문의: bumkyu.lee@gmail.com\n';
 		alert(msg);
 
-		//data
-		/*
-		var lanes = ["Chinese","Japanese","Korean","Mongol"],
-			laneLength = lanes.length,
-			items = [{"lane": "Chinese", "id": "Qin", "start": 5, "end": 205, "depth":1},
-					{"lane": "Chinese", "id": "Jin", "start": 265, "end": 420, "depth":1},
-					{"lane": "Chinese", "id": "Sui", "start": 580, "end": 615, "depth":1},
-					{"lane": "Chinese", "id": "Tang", "start": 620, "end": 900, "depth":2},
-					{"lane": "Chinese", "id": "Song", "start": 960, "end": 1265, "depth":1},
-					{"lane": "Chinese", "id": "Yuan", "start": 1270, "end": 1365, "depth":1},
-					{"lane": "Chinese", "id": "Ming", "start": 1370, "end": 1640, "depth":1},
-					{"lane": "Chinese", "id": "Qing", "start": 1645, "end": 1910, "depth":1},
-					{"lane": "Japanese", "id": "Yamato", "start": 300, "end": 530, "depth":1},
-					{"lane": "Japanese", "id": "Asuka", "start": 550, "end": 700, "depth":2},
-					{"lane": "Japanese", "id": "Nara", "start": 710, "end": 790, "depth":3},
-					{"lane": "Japanese", "id": "Heian", "start": 800, "end": 1180, "depth":4},
-					{"lane": "Japanese", "id": "Kamakura", "start": 1190, "end": 1330, "depth":5},
-					{"lane": "Japanese", "id": "Muromachi", "start": 1340, "end": 1560, "depth":6},
-					{"lane": "Japanese", "id": "Edo", "start": 1610, "end": 1860, "depth":7},
-					{"lane": "Japanese", "id": "Meiji", "start": 1870, "end": 1900, "depth":1},
-					{"lane": "Japanese", "id": "Taisho", "start": 1910, "end": 1920, "depth":2},
-					{"lane": "Japanese", "id": "Showa", "start": 1925, "end": 1985, "depth":3},
-					{"lane": "Japanese", "id": "Heisei", "start": 1990, "end": 1995, "depth":4},
-					{"lane": "Korean", "id": "Three Kingdoms", "start": 10, "end": 670, "depth":1},
-					{"lane": "Korean", "id": "North and South States", "start": 690, "end": 900, "depth":2},
-					{"lane": "Korean", "id": "Goryeo", "start": 920, "end": 1380, "depth":3},
-					{"lane": "Korean", "id": "Joseon", "start": 1390, "end": 1890, "depth":4},
-					{"lane": "Korean", "id": "Korean Empire", "start": 1900, "end": 1945, "depth":1},
-					{"lane": "Mongol", "id": "Song2", "start": 920, "end": 1565, "depth":1},
-					{"lane": "Mongol", "id": "Yuan2", "start": 1270, "end": 1365, "depth":2}
-					]
-			timeBegin = 0,
-			timeEnd = 2015;
-		*/
 		// 국가의 순서 구하기
 		function getNationalitySeq(nationality){
 			return lanes.indexOf(nationality);
@@ -186,6 +162,9 @@
 		var mainHeightUnit = mainHeight / getSumMaxDepth();
 		var miniHeightUnit = miniHeight / getSumMaxDepth();
 
+		// 유닛 길이 구하기(세로선)
+		var lineWidthUnit = screenWidth / (timeEnd - timeBegin);
+
 		//scales
 		var x = d3.scale.linear()
 				.domain([timeBegin, timeEnd])
@@ -196,6 +175,7 @@
 		var y2 = function(nationality) { return miniHeightUnit*(getMaxDepth(nationality) + getSumBeginDepth(nationality)); };
 		var y1_label = function(nationality) { return mainHeightUnit*(getMaxDepth(nationality)/2+ getSumBeginDepth(nationality)); }
 		var y2_label = function(nationality) { return miniHeightUnit*(getMaxDepth(nationality)/2+ getSumBeginDepth(nationality)); }
+		var x_vertical = function(year) { return year * lineWidthUnit; }
 
 		var chart = d3.select("body")
 					.append("svg")
@@ -222,6 +202,16 @@
 			.attr("y1", function(d) {return y1(d.lane);})
 			.attr("x2", w)
 			.attr("y2", function(d) {return y1(d.lane);})
+			.attr("stroke", "#f2f2f2")
+
+		//main lanes and texts
+		main.append("g").selectAll(".laneLines")
+			.data(laneVertical())
+			.enter().append("line")
+			.attr("x1", function(d) {return x_vertical(d);})
+			.attr("y1", 0)
+			.attr("x2", function(d) {return x_vertical(d);})
+			.attr("y2", screenHeight)
 			.attr("stroke", "#f2f2f2")
 
 		main.append("g").selectAll(".laneText")
