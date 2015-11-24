@@ -204,7 +204,7 @@
 			.attr("y2", function(d) {return y1(d.lane);})
 			.attr("stroke", "#f2f2f2")
 
-		//main lanes and texts
+		//세로선추가
 		main.append("g").selectAll(".laneLines")
 			.data(laneVertical())
 			.enter().append("line")
