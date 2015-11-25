@@ -4,6 +4,7 @@
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
 		<title>HistoryOfGreats</title>
 		<script type="text/javascript" src="http://mbostock.github.com/d3/d3.v2.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 		<style type="text/css">
 		.chart {
 			shape-rendering: crispEdges;
@@ -52,6 +53,11 @@
 			fill-opacity: .7;
 			stroke-width: 6;
 		}
+
+		.yearText{
+			font: 7px sans-serif;
+			fill: #e2e2e2;
+		}
 		</style>
 	</head>
 	<body>
@@ -74,7 +80,7 @@
 			}
 		};
 		var laneLength = lanes.length,
-			timeBegin = 200,
+			timeBegin = 0,
 			timeEnd = 2015,
 			lineSplit = 100;
 
@@ -194,6 +200,7 @@
 					.attr("width", w)
 					.attr("height", mainHeight)
 					.attr("class", "main");
+
 		//main lanes and texts
 		main.append("g").selectAll(".laneLines")
 			.data(items)
@@ -202,7 +209,7 @@
 			.attr("y1", function(d) {return y1(d.lane);})
 			.attr("x2", w)
 			.attr("y2", function(d) {return y1(d.lane);})
-			.attr("stroke", "#f2f2f2")
+			.attr("stroke", "#f2f2f2");
 
 		//세로선추가
 		main.append("g").selectAll(".laneLines")
@@ -212,9 +219,21 @@
 			.attr("y1", 0)
 			.attr("x2", function(d) {return x_vertical(d);})
 			.attr("y2", screenHeight)
-			.attr("stroke", "#f2f2f2")
+			.attr("stroke", "#f2f2f2");
 
+		//세로 년도 추가
 		main.append("g").selectAll(".laneText")
+			.data(laneVertical())
+			.enter().append("text")
+			.attr("x", function(d) {return x_vertical(d);})
+			.text(function(d) {return d;})
+			.attr("y", 0)
+			.attr("class", "yearText");
+
+		//국가명 추가
+		main.append("g")
+			.attr("id","names")
+			.selectAll(".laneText")
 			.data(lanes)
 			.enter().append("text")
 			.text(function(d) {return d;})
@@ -223,6 +242,57 @@
 			.attr("dy", ".3ex")
 			.attr("text-anchor", "middle")
 			.attr("class", "laneText");
+
+		// scroll stop detector
+		;(function ($) {
+		    var on = $.fn.on, timer;
+		    $.fn.on = function () {
+		        var args = Array.apply(null, arguments);
+		        var last = args[args.length - 1];
+
+		        if (isNaN(last) || (last === 1 && args.pop())) return on.apply(this, args);
+
+		        var delay = args.pop();
+		        var fn = args.pop();
+
+		        args.push(function () {
+		            var self = this, params = arguments;
+		            clearTimeout(timer);
+		            timer = setTimeout(function () {
+		                fn.apply(self, params);
+		            }, delay);
+		        });
+
+		        return on.apply(this, args);
+		    };
+		}(this.jQuery || this.Zepto));
+
+		var opacity = true;
+		var y_position = $(window).scrollTop();
+		var y_move = false;
+		$(window).scroll(function(){
+			y_move = y_position != parseInt($(window).scrollTop());
+			console.log(y_position + " / " + $(window).scrollTop());
+			console.log(y_move);
+			y_position = parseInt($(window).scrollTop());
+			if (opacity && !y_move) {
+				main.selectAll("#names")
+					.transition()
+					.duration(50)
+					.style("opacity",0);
+				opacity = false;
+			};
+		});
+
+		$(window).on('scroll', function(e) {
+			var position_horizontal = parseInt($(this).scrollLeft());
+			$("g#names").attr("transform","translate("+position_horizontal+",0)");
+			main.selectAll("#names")
+				.transition()
+				.duration(20)
+				.style("opacity",1);
+			opacity = true;
+		}, 50);
 
 		var itemRects = main.append("g").attr("clip-path", "url(#clip)");
 
