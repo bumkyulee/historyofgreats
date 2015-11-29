@@ -4,6 +4,7 @@
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
 		<title>HistoryOfGreats</title>
 		<script type="text/javascript" src="http://mbostock.github.com/d3/d3.v2.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 		<style type="text/css">
 		.chart {
 			shape-rendering: crispEdges;
@@ -53,10 +54,9 @@
 			stroke-width: 6;
 		}
 
-		.brush .extent {
-			stroke: gray;
-			fill: dodgerblue;
-			fill-opacity: .365;
+		.yearText{
+			font: 7px sans-serif;
+			fill: #e2e2e2;
 		}
 		</style>
 	</head>
@@ -72,50 +72,35 @@
 			arrTemp['end'] = Number(data[i][2]);
 			arrTemp['start'] = Number(data[i][1]);
 			arrTemp['id'] = data[i][0];
+			arrTemp['desc'] = data[i][5];
+			arrTemp['url'] = data[i][6];
 			items.push(arrTemp);
 			if(lanes.indexOf(data[i][3]) == -1) {
 				lanes.push(data[i][3]);
 			}
 		};
-
 		var laneLength = lanes.length,
 			timeBegin = 0,
-			timeEnd = 2015;
+			timeEnd = 2015,
+			lineSplit = 100;
 
-		//data
-		/*
-		var lanes = ["Chinese","Japanese","Korean","Mongol"],
-			laneLength = lanes.length,
-			items = [{"lane": "Chinese", "id": "Qin", "start": 5, "end": 205, "depth":1},
-					{"lane": "Chinese", "id": "Jin", "start": 265, "end": 420, "depth":1},
-					{"lane": "Chinese", "id": "Sui", "start": 580, "end": 615, "depth":1},
-					{"lane": "Chinese", "id": "Tang", "start": 620, "end": 900, "depth":2},
-					{"lane": "Chinese", "id": "Song", "start": 960, "end": 1265, "depth":1},
-					{"lane": "Chinese", "id": "Yuan", "start": 1270, "end": 1365, "depth":1},
-					{"lane": "Chinese", "id": "Ming", "start": 1370, "end": 1640, "depth":1},
-					{"lane": "Chinese", "id": "Qing", "start": 1645, "end": 1910, "depth":1},
-					{"lane": "Japanese", "id": "Yamato", "start": 300, "end": 530, "depth":1},
-					{"lane": "Japanese", "id": "Asuka", "start": 550, "end": 700, "depth":2},
-					{"lane": "Japanese", "id": "Nara", "start": 710, "end": 790, "depth":3},
-					{"lane": "Japanese", "id": "Heian", "start": 800, "end": 1180, "depth":4},
-					{"lane": "Japanese", "id": "Kamakura", "start": 1190, "end": 1330, "depth":5},
-					{"lane": "Japanese", "id": "Muromachi", "start": 1340, "end": 1560, "depth":6},
-					{"lane": "Japanese", "id": "Edo", "start": 1610, "end": 1860, "depth":7},
-					{"lane": "Japanese", "id": "Meiji", "start": 1870, "end": 1900, "depth":1},
-					{"lane": "Japanese", "id": "Taisho", "start": 1910, "end": 1920, "depth":2},
-					{"lane": "Japanese", "id": "Showa", "start": 1925, "end": 1985, "depth":3},
-					{"lane": "Japanese", "id": "Heisei", "start": 1990, "end": 1995, "depth":4},
-					{"lane": "Korean", "id": "Three Kingdoms", "start": 10, "end": 670, "depth":1},
-					{"lane": "Korean", "id": "North and South States", "start": 690, "end": 900, "depth":2},
-					{"lane": "Korean", "id": "Goryeo", "start": 920, "end": 1380, "depth":3},
-					{"lane": "Korean", "id": "Joseon", "start": 1390, "end": 1890, "depth":4},
-					{"lane": "Korean", "id": "Korean Empire", "start": 1900, "end": 1945, "depth":1},
-					{"lane": "Mongol", "id": "Song2", "start": 920, "end": 1565, "depth":1},
-					{"lane": "Mongol", "id": "Yuan2", "start": 1270, "end": 1365, "depth":2}
-					]
-			timeBegin = 0,
-			timeEnd = 2015;
-		*/
+		var laneVertical = function(){
+			var lv = new Array();
+			minYear = timeBegin - timeBegin % lineSplit + lineSplit; // 223 년 -> 300 년
+			maxYear = timeEnd - timeEnd%lineSplit; // 1928 년 -> 1900 년
+			for (var i = minYear; i <= maxYear; i = i + lineSplit) {
+				lv.push(i);
+			};
+			return lv;
+		}
+
+		// 설명
+		var msg = '1. 누구랑 누구랑 같은 시대에 살았을까요?\n';
+		      msg += '2. 이름을 누르면 설명으로 이동합니다.\n';
+		      msg += '3. 누구나 인물을 추가할 수 있습니다.\n';
+		      msg += '4. 추가문의: bumkyu.lee@gmail.com\n';
+		alert(msg);
+
 		// 국가의 순서 구하기
 		function getNationalitySeq(nationality){
 			return lanes.indexOf(nationality);
@@ -170,18 +155,21 @@
 		    screenWidth = w.innerWidth || e.clientWidth || g.clientWidth,
 		    screenHeight = w.innerHeight|| e.clientHeight|| g.clientHeight;
 
-		    screenWidth = 2000
+		    screenWidth = 4000
 		    screenHeight = 3000
 
-		var m = [0, 30, 0, 80], //top right bottom left
+		var m = [10, 10, 10, 10], //top right bottom left
 			w = screenWidth - m[1] - m[3],
 			h = screenHeight - m[0] - m[2],
-			miniHeight = laneLength * 7 + 50,
+			miniHeight = 0
 			mainHeight = h - miniHeight - 30;
 
 		// 유닛 높이 구하기
 		var mainHeightUnit = mainHeight / getSumMaxDepth();
 		var miniHeightUnit = miniHeight / getSumMaxDepth();
+
+		// 유닛 길이 구하기(세로선)
+		var lineWidthUnit = screenWidth / (timeEnd - timeBegin);
 
 		//scales
 		var x = d3.scale.linear()
@@ -189,18 +177,11 @@
 				.range([0, w]);
 		var x1 = d3.scale.linear()
 				.range([0, w]);
-		/*
-		var y1 = d3.scale.linear()
-				.domain([0, laneLength])
-				.range([0, mainHeight]);
-		var y2 = d3.scale.linear()
-				.domain([0, laneLength])
-				.range([0, miniHeight]);
-		*/
 		var y1 = function(nationality) { return mainHeightUnit*(getMaxDepth(nationality) + getSumBeginDepth(nationality)); };
 		var y2 = function(nationality) { return miniHeightUnit*(getMaxDepth(nationality) + getSumBeginDepth(nationality)); };
 		var y1_label = function(nationality) { return mainHeightUnit*(getMaxDepth(nationality)/2+ getSumBeginDepth(nationality)); }
 		var y2_label = function(nationality) { return miniHeightUnit*(getMaxDepth(nationality)/2+ getSumBeginDepth(nationality)); }
+		var x_vertical = function(year) { return year * lineWidthUnit; }
 
 		var chart = d3.select("body")
 					.append("svg")
@@ -220,109 +201,129 @@
 					.attr("height", mainHeight)
 					.attr("class", "main");
 
-		var mini = chart.append("g")
-					.attr("transform", "translate(" + m[3] + "," + (mainHeight + m[0]) + ")")
-					.attr("width", w)
-					.attr("height", miniHeight)
-					.attr("class", "mini");
 		//main lanes and texts
 		main.append("g").selectAll(".laneLines")
 			.data(items)
 			.enter().append("line")
-			.attr("x1", m[1])
+			.attr("x1", 0)
 			.attr("y1", function(d) {return y1(d.lane);})
 			.attr("x2", w)
 			.attr("y2", function(d) {return y1(d.lane);})
-			.attr("stroke", "lightgray")
+			.attr("stroke", "#f2f2f2");
 
-		main.append("g").selectAll(".laneText")
-			.data(lanes)
-			.enter().append("text")
-			.text(function(d) {return d;})
-			.attr("x", -m[1])
-			.attr("y", function(d, i) {return y1_label(d);})
-			.attr("dy", ".5ex")
-			.attr("text-anchor", "end")
-			.attr("class", "laneText");
-
-		//mini lanes and texts
-		mini.append("g").selectAll(".laneLines")
-			.data(items)
+		//세로선추가
+		main.append("g").selectAll(".laneLines")
+			.data(laneVertical())
 			.enter().append("line")
-			.attr("x1", m[1])
-			.attr("y1", function(d) {return y2(d.lane);})
-			.attr("x2", w)
-			.attr("y2", function(d) {return y2(d.lane);})
-			.attr("stroke", "lightgray");
+			.attr("x1", function(d) {return x_vertical(d);})
+			.attr("y1", 0)
+			.attr("x2", function(d) {return x_vertical(d);})
+			.attr("y2", screenHeight)
+			.attr("stroke", "#f2f2f2");
 
-		mini.append("g").selectAll(".laneText")
+		//세로 년도 추가
+		main.append("g").selectAll(".laneText")
+			.data(laneVertical())
+			.enter().append("text")
+			.attr("x", function(d) {return x_vertical(d);})
+			.text(function(d) {return d;})
+			.attr("y", 0)
+			.attr("class", "yearText");
+
+		//국가명 추가
+		main.append("g")
+			.attr("id","names")
+			.selectAll(".laneText")
 			.data(lanes)
 			.enter().append("text")
 			.text(function(d) {return d;})
-			.attr("x", -m[1])
-			.attr("y", function(d, i) {return y2_label(d);})
-			.attr("dy", ".5ex")
-			.attr("text-anchor", "end")
+			.attr("x", 30)
+			.attr("y", function(d, i) {return y1_label(d);})
+			.attr("dy", ".3ex")
+			.attr("text-anchor", "middle")
 			.attr("class", "laneText");
+
+		// scroll stop detector
+		;(function ($) {
+		    var on = $.fn.on, timer;
+		    $.fn.on = function () {
+		        var args = Array.apply(null, arguments);
+		        var last = args[args.length - 1];
+
+		        if (isNaN(last) || (last === 1 && args.pop())) return on.apply(this, args);
+
+		        var delay = args.pop();
+		        var fn = args.pop();
+
+		        args.push(function () {
+		            var self = this, params = arguments;
+		            clearTimeout(timer);
+		            timer = setTimeout(function () {
+		                fn.apply(self, params);
+		            }, delay);
+		        });
+
+		        return on.apply(this, args);
+		    };
+		}(this.jQuery || this.Zepto));
+
+		var opacity = true;
+		var y_position = $(window).scrollTop();
+		var y_move = false;
+		$(window).scroll(function(){
+			y_move = y_position != parseInt($(window).scrollTop());
+			console.log(y_position + " / " + $(window).scrollTop());
+			console.log(y_move);
+			y_position = parseInt($(window).scrollTop());
+			if (opacity && !y_move) {
+				main.selectAll("#names")
+					.transition()
+					.duration(150)
+					.style("opacity",0);
+				opacity = false;
+			};
+		});
+
+		$(window).on('scroll', function(e) {
+			var position_horizontal = parseInt($(this).scrollLeft());
+			$("g#names").attr("transform","translate("+position_horizontal+",0)");
+			main.selectAll("#names")
+				.transition()
+				.duration(150)
+				.style("opacity",1);
+			opacity = true;
+		}, 100);
 
 		var itemRects = main.append("g").attr("clip-path", "url(#clip)");
-
-		//mini item rects
-		mini.append("g").selectAll("miniItems")
-			.data(items)
-			.enter().append("rect")
-			.attr("class", function(d) {return getMiniItemNo(d.lane);})
-			.attr("x", function(d) {return x(d.start);})
-			.attr("y", function(d) {return (getSumBeginDepth(d.lane)+d.depth-1)*miniHeightUnit;})
-			.attr("width", function(d) {return x(d.end - d.start);})
-			.attr("height", miniHeightUnit);
-
-		//mini labels
-		mini.append("g").selectAll(".miniLabels")
-			.data(items)
-			.enter().append("text")
-			.text(function(d) {return d.id;})
-			.attr("x", function(d) {return x(d.start);})
-			.attr("y", function(d) {return (getSumBeginDepth(d.lane)+d.depth-1)*miniHeightUnit;})
-			.attr("dy", ".5ex");
-
-		//brush
-		var brush = d3.svg.brush()
-							.x(x)
-							.on("brush", display);
-
-		mini.append("g")
-			.attr("class", "x brush")
-			.call(brush)
-			.selectAll("rect")
-			.attr("y", 1)
-			.attr("height", miniHeight - 1);
 
 		display();
 
 		function display() {
 			var rects, labels,
-				minExtent = brush.extent()[0],
-				maxExtent = brush.extent()[1],
+				minExtent = timeBegin,
+				maxExtent = timeEnd,
 				visItems = items.filter(function(d) {return d.start < maxExtent && d.end > minExtent;});
-
-			mini.select(".brush")
-				.call(brush.extent([minExtent, maxExtent]));
 
 			x1.domain([minExtent, maxExtent]);
 
 			//update main item rects
 			rects = itemRects.selectAll("rect")
-			        .data(visItems, function(d) { return d.id; })
+			        .data(items, function(d) { return d.id; })
 				.attr("x", function(d) {return x1(d.start);})
 				.attr("width", function(d) {return x1(d.end) - x1(d.start);});
 
-			rects.enter().append("rect")
+			rects.enter().append('a')
+    				.attr('xlink:href', function(d) {return d.url;})
+          				.attr("alt", function(d) {return d.desc;})
+          				.attr("target", "_blank")
+				.append("rect")
 				.attr("class", function(d) {return getMiniItemNo(d.lane);})
 				.attr("x", function(d) {return x1(d.start);})
-				.attr("y", function(d) {return  mainHeightUnit*(getSumBeginDepth(d.lane)+d.depth-1); })
+				.attr("y", function(d) {return  mainHeightUnit*(getSumBeginDepth(d.lane)+d.depth-1)+1.5; })
 				.attr("width", function(d) {return x1(d.end) - x1(d.start);})
-				.attr("height", function(d) {return .9 * mainHeightUnit;});
+				.attr("height", function(d) {return .9 * mainHeightUnit;})
+				.attr("rx", 3)
+				.attr("ry", 3)
 
 			rects.exit().remove();
 
@@ -331,10 +332,14 @@
 				.data(visItems, function (d) { return d.id; })
 				.attr("x", function(d) {return x1(Math.max(d.start, minExtent) + 2);});
 
-			labels.enter().append("text")
+			labels.enter().append('a')
+    				.attr('xlink:href', function(d) {return d.url;})
+          				.attr("alt", function(d) {return d.desc;})
+          				.attr("target", "_blank")
+				.append("text")
 				.text(function(d) {return d.id + " (" + d.start + "~"+d.end+") ";})
-				.attr("x", function(d) {return x1(Math.max(d.start, minExtent));})
-				.attr("y", function(d) {return mainHeightUnit*(getSumBeginDepth(d.lane)+d.depth-0.5);  })
+				.attr("x", function(d) {return x1(Math.max(d.start+2, minExtent));})
+				.attr("y", function(d) {return mainHeightUnit*(getSumBeginDepth(d.lane)+d.depth-0.25);  })
 				.attr("text-anchor", "start");
 
 			labels.exit().remove();
