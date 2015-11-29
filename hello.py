@@ -6,9 +6,11 @@ import gspread
 from oauth2client.client import SignedJwtAssertionCredentials
 import json
 
+import urllib
 import urllib2
 from BeautifulSoup import BeautifulSoup
 import random
+
 
 app = Flask(__name__)
 
@@ -106,6 +108,38 @@ def update_one(schName):
 		value = [0,0,0,0]
 		return value
 
+@app.route("/getinfobing/<schName>")
+def getinfobing(schName):
+	try:
+		opener = urllib2.build_opener()
+		opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+		url = u'http://www.bing.com/search?q='+schName
+		url = urllib.quote(url.encode('utf8'), '/:')
+		page = opener.open(url)
+	       	soup = BeautifulSoup(page)
+		name = soup.findAll('h2',attrs={'class':' b_entityTitle'})[0].text
+		infobox = soup.find('ul',attrs={'class':'b_vList'}).findAll('li')
+
+	       	birth_strs = ['출생:']
+	       	death_strs = ['사망:']
+	       	birth = '?'
+	       	death = '?'
+
+		for data in infobox:
+	   		text = data.text.encode('utf-8')
+	   		temp = text.replace('AD ','').replace(':',' ').replace('년',' ').split(' ')[1]
+	   		if findString(temp,'BC '):
+	   			 raise Exception('BC')
+	       		if findString(text,birth_strs):
+	       			birth = temp
+	       		elif findString(text,death_strs):
+	       			death = temp
+	       		else:
+	       			pass
+	       	value = [name,birth,death]
+	except Exception, e:
+		value = [0,0,e.args[0]]
+       	return json.dumps(value)
 
 @app.route("/getinfo/<schName>")
 def getinfo(schName):
