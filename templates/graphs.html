@@ -5,11 +5,11 @@
 		<title>HistoryOfGreats</title>
 		<script type="text/javascript" src="http://mbostock.github.com/d3/d3.v2.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+		<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
 		<style type="text/css">
 		.chart {
 			shape-rendering: crispEdges;
 		}
-
 		.mini text {
 			font: 9px sans-serif;
 		}
@@ -58,13 +58,22 @@
 			font: 7px sans-serif;
 			fill: #e2e2e2;
 		}
+		.infobox{
+			position:fixed;
+			z-index:1;
+			top:90%;
+			right:3%;
+			visibility: visible;
+		}
+		.infobtn{
+			float: left;
+			margin-left: 10px;
+		}
 		</style>
 	</head>
 	<body>
 		<script type="text/javascript">
 		// 오른쪽으로 움직인다.
-		//$('body').animate({scrollLeft:'+=5000'},4000);
-
 		var data = {{ data|tojson }};
 		var items = new Array();
 		var lanes = new Array();
@@ -149,7 +158,6 @@
 			};
 			return sumDepth;
 		}
-		//
 		</script>
 		<script type="text/javascript">
 		var w = window,
@@ -198,7 +206,6 @@
 			.append("rect")
 			.attr("width", w)
 			.attr("height", mainHeight);
-
 
 		chart.append("rect")
 				.attr("id","highlightbox")
@@ -339,7 +346,8 @@
 				.on('click',function(d){  showHighlight(
 					x1(d.start),
 					x1(d.end) - x1(d.start),
-					getMiniItemNo(d.lane)
+					getMiniItemNo(d.lane),
+					d.url
 				); });
 
 			rects.exit().remove();
@@ -359,7 +367,8 @@
 				.on('click',function(d){  showHighlight(
 					x1(d.start),
 					x1(d.end) - x1(d.start),
-					getMiniItemNo(d.lane)
+					getMiniItemNo(d.lane),
+					d.url
 				); });
 
 			labels.exit().remove();
@@ -369,15 +378,28 @@
 		function hideHighlight(){
 			chart.select("#highlightbox")
 					.attr("opacity",0);
+			$("#info").hide();
+			$("#claim").hide();
 		}
-		function showHighlight(x,width,color){
-			chart.select("#highlightbox")
-				.attr("x",x+m[3] )
-				.attr("width",width)
-				.attr("class",color)
-				.attr("opacity",0.3);
+		function showHighlight(x,width,color,url){
+			hideHighlight();
+			setTimeout(function(){
+				chart.select("#highlightbox")
+					.attr("x",x+m[3] )
+					.attr("width",width)
+					.attr("class",color)
+					.attr("opacity",0.3);
+				$('#info').attr('href',url);
+				$("#info").show();
+				$("#claim").show();
+				}
+				, 30);
 		}
-
 		</script>
+		<div class = "infobox">
+			<a id="info" target="_blank"  class="btn btn-info btn-lg infobtn" style="display:none">보러가기</a>
+			<a href="claim" target="_blank"  id="claim" class="btn btn-warning btn-lg infobtn" style="display:none">신고하기</a>
+			<a href="add" target="_blank" id="add" class="btn btn-danger btn-lg infobtn">추가하기</a>
+		</div>
 	</body>
 </html>

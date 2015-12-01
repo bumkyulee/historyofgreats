@@ -32,6 +32,14 @@ def connect():
 
 	return render_template('graphs.html',data=data)
 
+@app.route("/add")
+def add():
+	return render_template('add.html')
+
+@app.route("/claim")
+def claim():
+	return '작업중입니다'
+
 # 테스트 용으로 잠시 놔둠
 @app.route("/getinfobing/<schName>")
 def getinfobing(schName):
