@@ -326,9 +326,7 @@
 				.attr("x", function(d) {return x1(d.start);})
 				.attr("width", function(d) {return x1(d.end) - x1(d.start);});
 
-			rects.enter().append('a')
-    				.attr('xlink:href', '')
-          				.attr("alt", function(d) {return d.desc;})
+			rects.enter()
 				.append("rect")
 				.attr("class", function(d) {return getMiniItemNo(d.lane);})
 				.attr("x", function(d) {return x1(d.start);})
@@ -337,6 +335,7 @@
 				.attr("height", function(d) {return .9 * mainHeightUnit;})
 				.attr("rx", 3)
 				.attr("ry", 3)
+				.attr("style", "cursor:pointer")
 				.on('click',function(d){  showHighlight(
 					x1(d.start),
 					x1(d.end) - x1(d.start),
@@ -350,14 +349,13 @@
 				.data(visItems, function (d) { return d.id; })
 				.attr("x", function(d) {return x1(Math.max(d.start, minExtent) + 2);});
 
-			labels.enter().append('a')
-    				.attr('xlink:href', '')
-          				.attr("alt", function(d) {return d.desc;})
+			labels.enter()
 				.append("text")
 				.text(function(d) {return d.id + " (" + d.start + "~"+d.end+") ";})
 				.attr("x", function(d) {return x1(Math.max(d.start+2, minExtent));})
 				.attr("y", function(d) {return mainHeightUnit*(getSumBeginDepth(d.lane)+d.depth-0.25);  })
 				.attr("text-anchor", "start")
+				.attr("style", "cursor:pointer")
 				.on('click',function(d){  showHighlight(
 					x1(d.start),
 					x1(d.end) - x1(d.start),
