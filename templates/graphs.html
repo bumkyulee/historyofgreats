@@ -62,6 +62,9 @@
 	</head>
 	<body>
 		<script type="text/javascript">
+		// 오른쪽으로 움직인다.
+		//$('body').animate({scrollLeft:'+=5000'},4000);
+
 		var data = {{ data|tojson }};
 		var items = new Array();
 		var lanes = new Array();
@@ -146,6 +149,7 @@
 			};
 			return sumDepth;
 		}
+		//
 		</script>
 		<script type="text/javascript">
 		var w = window,
@@ -195,11 +199,21 @@
 			.attr("width", w)
 			.attr("height", mainHeight);
 
+
+		chart.append("rect")
+				.attr("id","highlightbox")
+				.attr("x",100)
+				.attr("y",-50)
+				.attr("width",100)
+				.attr("height",mainHeight+200)
+				.attr("opacity",0);
+
 		var main = chart.append("g")
 					.attr("transform", "translate(" + m[3] + "," + m[0] + ")")
 					.attr("width", w)
 					.attr("height", mainHeight)
 					.attr("class", "main");
+
 
 		//main lanes and texts
 		main.append("g").selectAll(".laneLines")
@@ -313,9 +327,8 @@
 				.attr("width", function(d) {return x1(d.end) - x1(d.start);});
 
 			rects.enter().append('a')
-    				.attr('xlink:href', function(d) {return d.url;})
+    				.attr('xlink:href', '')
           				.attr("alt", function(d) {return d.desc;})
-          				.attr("target", "_blank")
 				.append("rect")
 				.attr("class", function(d) {return getMiniItemNo(d.lane);})
 				.attr("x", function(d) {return x1(d.start);})
@@ -324,6 +337,11 @@
 				.attr("height", function(d) {return .9 * mainHeightUnit;})
 				.attr("rx", 3)
 				.attr("ry", 3)
+				.on('click',function(d){  showHighlight(
+					x1(d.start),
+					x1(d.end) - x1(d.start),
+					getMiniItemNo(d.lane)
+				); });
 
 			rects.exit().remove();
 
@@ -333,17 +351,33 @@
 				.attr("x", function(d) {return x1(Math.max(d.start, minExtent) + 2);});
 
 			labels.enter().append('a')
-    				.attr('xlink:href', function(d) {return d.url;})
+    				.attr('xlink:href', '')
           				.attr("alt", function(d) {return d.desc;})
-          				.attr("target", "_blank")
 				.append("text")
 				.text(function(d) {return d.id + " (" + d.start + "~"+d.end+") ";})
 				.attr("x", function(d) {return x1(Math.max(d.start+2, minExtent));})
 				.attr("y", function(d) {return mainHeightUnit*(getSumBeginDepth(d.lane)+d.depth-0.25);  })
-				.attr("text-anchor", "start");
+				.attr("text-anchor", "start")
+				.on('click',function(d){  showHighlight(
+					x1(d.start),
+					x1(d.end) - x1(d.start),
+					getMiniItemNo(d.lane)
+				); });
 
 			labels.exit().remove();
 
+		}
+
+		function hideHighlight(){
+			chart.select("#highlightbox")
+					.attr("opacity",0);
+		}
+		function showHighlight(x,width,color){
+			chart.select("#highlightbox")
+				.attr("x",x+m[3] )
+				.attr("width",width)
+				.attr("class",color)
+				.attr("opacity",0.3);
 		}
 
 		</script>
