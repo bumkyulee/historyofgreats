@@ -40,6 +40,10 @@ def add():
 def claim():
 	return '작업중입니다'
 
+@app.route("/add/item")
+def add_item():
+	return '1'
+
 # 테스트 용으로 잠시 놔둠
 @app.route("/getinfobing/<schName>")
 def getinfobing(schName):
