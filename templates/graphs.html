@@ -18,13 +18,11 @@
 			  left:0;
 			  top:0;
 		}
-		#window{
+		.window{
 			  display: none;
 			  position:absolute;
-			  width: 200px;
-			  height: 200px;
+			  width: 35%;
 			  z-index:10000;
-			  background-color: white;
 		}
 		</style>
 	</head>
@@ -335,7 +333,6 @@
 			chart.select("#highlightbox")
 					.attr("opacity",0);
 			$("#info").hide();
-			$("#claim").hide();
 		}
 		function showHighlight(x,width,color,url){
 			hideHighlight();
@@ -347,7 +344,6 @@
 					.attr("opacity",0.3);
 				$('#info').attr('href',url);
 				$("#info").show();
-				$("#claim").show();
 				}
 				, 30);
 		}
@@ -355,41 +351,175 @@
 
 		<div class = "infobox">
 			<a id="info" target="_blank"  class="btn btn-info btn-lg infobtn" style="display:none">보러가기</a>
-			<a href="claim" target="_blank"  id="claim" class="btn btn-warning btn-lg infobtn" style="display:none">신고하기</a>
+			<a id="claim" class="btn btn-warning btn-lg infobtn">문의하기</a>
 			<a id="add" class="btn btn-danger btn-lg infobtn">추가하기</a>
 		</div>
 		<div id="mask"></div>
-		<div id="window">
 
+		<!-- 추가하기 윈도우 창 -->
+		<div class="window" id="addwindow">
+			  <div class="modal-dialog" style="width:100%">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h4 class="modal-title">인물을 추가합니다</h4>
+			      </div>
+			      <div class="modal-body">
+
+			      	<form class="form-horizontal">
+				  <fieldset>
+				    <div class="form-group">
+				      <label for="name" class="col-lg-2 control-label">이름</label>
+				      <div class="col-lg-10">
+				        <input type="text" class="form-control" id="name" placeholder="홍길동">
+				      </div>
+				    </div>
+				    <div class="form-group">
+				      <label for="nationality" class="col-lg-2 control-label">국가</label>
+				      <div class="col-lg-10">
+				        <select class="form-control" id="nationality">
+				          <option>한국</option>
+				          <option>미국</option>
+				          <option>일본</option>
+				          <option>중국</option>
+				          <option>프랑스</option>
+				        </select>
+				      </div>
+				    </div>
+				 </fieldset>
+				<p class="text-danger" id="result" style="text-align: center; display:none">
+					이미 있는 이름입니다 [
+					<span id="searchname" style="color:gray;">홍길동</span>
+					]으로 검색해보세요
+				</p>
+				</form>
+			      </div>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="addClose()">닫기</button>
+			        <button type="button" class="btn btn-primary" onclick="addWarning('임꺽정');">추가하기</button>
+			      </div>
+			    </div>
+			  </div>
 		</div>
-		<script>
-			function wrapWindowByMask(){
-			        //화면의 높이와 너비를 구한다.
-			        var maskHeight = screenHeight;
-			        var maskWidth = screenWidth;
 
+		<!-- 문의하기  윈도우 창 -->
+		<div class="window" id="claimwindow">
+			  <div class="modal-dialog" style="width:100%">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h4 class="modal-title">여보세요</h4>
+			      </div>
+			      <div class="modal-body">
+				<p class="text-info">
+					어떤 말이든 환영합니다. :)
+				</p>
+			      	<form class="form-horizontal">
+				  <fieldset>
+				    <div class="form-group">
+				      <label for="claimtype" class="col-lg-2 control-label">말머리</label>
+				      <div class="col-lg-10">
+				        <select class="form-control" id="claimtype">
+				          <option value ='1'>고마워요</option>
+				          <option value ='2'>할 말 있어요</option>
+				          <option value ='3'>데이터가 이상해요</option>
+				        </select>
+				      </div>
+				    </div>
+				    <div class="form-group">
+				      <label for="claimtext" class="col-lg-2 control-label">내용</label>
+				      <div class="col-lg-10">
+				        <textarea class="form-control" rows="3" id="claimtext"></textarea>
+				      </div>
+				    </div>
+				 </fieldset>
+				</form>
+			      </div>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="claimClose()">닫기</button>
+			        <button type="button" class="btn btn-primary" onclick="alert('보내기 작업중');">보내기</button>
+			      </div>
+			    </div>
+			  </div>
+		</div>
+
+		<script>
+			// 마스크 띄우기
+			function maskOpen(){
 			        //마스크의 높이와 너비를 화면 것으로 만들어 전체 화면을 채운다.
-			        $('#mask').css({'width':maskWidth,'height':maskHeight});
+			        $('#mask').css({'width':screenWidth,'height':screenHeight});
 
 			        //애니메이션 효과
 			        $('#mask').fadeTo("slow",0.3);
 
-			        //창띄우기
-			        center();
-			        $('#window').show();
-
 			        // 스크롤막기
 			        blockWheel();
 			}
+			// 마스크 끄기
+			function maskClose(){
+				playWheel();
+				$('#mask').hide();
+			}
+			// 추가 창 띄우기
+			function addOpen(){
+			        // 모든 창 닫기
+			        allClose();
+
+			        // 마스크띄우기
+			        maskOpen();
+
+			        //창띄우기
+			        center('addwindow');
+			        $('#addwindow').show();
+			}
+			function addClose(){
+				maskClose();
+				$('#addwindow').hide();
+				addInit();
+			}
+			function addInit(){
+				$('#result').hide();
+			}
+			function addWarning(searchname){
+				$('#searchname').text(searchname);
+				$('#result').show();
+			}
+			function claimOpen(){
+			        // 모든 창 닫기
+			        allClose();
+
+			        // 마스크띄우기
+			        maskOpen();
+
+			        //창띄우기
+			        center('claimwindow');
+			        $('#claimwindow').show();
+			}
+			function claimClose(){
+				    $('#claimwindow').hide();
+				    maskClose();
+				    claimInit();
+			}
+			function claimInit(){
+				$('#claimtext').val('');
+				$("#claimtype").val('1');
+			}
+			function allClose(){
+				addClose();
+				claimClose();
+				alert('버튼 작업중입니다');
+			}
+			// 추가 버튼 클릭 이벤트
 			$('#add').click(function(e){
 				e.preventDefault();
-				wrapWindowByMask();
+				addOpen();
 			});
-			//검은 막을 눌렀을 때
+			// 문의하기 버튼 클릭 이벤트
+			$('#claim').click(function(e){
+				e.preventDefault();
+				claimOpen();
+			});
+			//검은 막 클릭 이벤트
 			$('#mask').click(function () {
-			    playWheel();
-			    $(this).hide();
-			    $('#window').hide();
+				allClose();
 			});
 		</script>
 	</body>

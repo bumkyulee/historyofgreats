@@ -1,5 +1,5 @@
-function center(){
-	var $layerPopupObj = $('#window');
+function center(id){
+	var $layerPopupObj = $('#'+id);
 	var left = ( $(window).scrollLeft() + ($(window).width() - $layerPopupObj.width()) / 2 );
 	var top = ( $(window).scrollTop() + ($(window).height() - $layerPopupObj.height()) / 2 );
 	$layerPopupObj.css({'left':left,'top':top, 'position':'absolute'});
