@@ -5,76 +5,31 @@
 		<title>HistoryOfGreats</title>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 		<script type="text/javascript" src="http://mbostock.github.com/d3/d3.v2.js"></script>
-		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+		<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+		<link href="{{ url_for('static', filename='css/graphs.css') }}" rel="stylesheet">
+		<script src="{{ url_for('static', filename='js/common.js') }}"></script>
 		<style type="text/css">
-		.chart {
-			shape-rendering: crispEdges;
+		#mask {
+			  position:absolute;
+			  z-index:9000;
+			  background-color:#000;
+			  display:none;
+			  left:0;
+			  top:0;
 		}
-		.mini text {
-			font: 9px sans-serif;
-		}
-
-		.main text {
-			font: 12px sans-serif;
-		}
-
-		.miniItem0 {
-			fill: #1abc9c;
-			fill-opacity: .7;
-			stroke-width: 6;
-		}
-
-		.miniItem1 {
-			fill: #2ecc71;
-			fill-opacity: .7;
-			stroke-width: 6;
-		}
-
-		.miniItem2 {
-			fill: #3498db;
-			fill-opacity: .7;
-			stroke-width: 6;
-		}
-
-		.miniItem3 {
-			fill: #9b59b6;
-			fill-opacity: .7;
-			stroke-width: 6;
-		}
-
-		.miniItem4 {
-			fill: #95a5a6;
-			fill-opacity: .7;
-			stroke-width: 6;
-		}
-
-		.miniItem5 {
-			fill: #e67e22;
-			fill-opacity: .7;
-			stroke-width: 6;
-		}
-
-		.yearText{
-			font: 7px sans-serif;
-			fill: #e2e2e2;
-		}
-		.infobox{
-			position:fixed;
-			z-index:1;
-			top:90%;
-			right:3%;
-			visibility: visible;
-		}
-		.infobtn{
-			float: left;
-			margin-left: 10px;
+		#window{
+			  display: none;
+			  position:absolute;
+			  width: 200px;
+			  height: 200px;
+			  z-index:10000;
+			  background-color: white;
 		}
 		</style>
 	</head>
 	<body>
 		<script type="text/javascript">
-		// 오른쪽으로 움직인다.
 		var data = {{ data|tojson }};
 		var items = new Array();
 		var lanes = new Array();
@@ -401,24 +356,41 @@
 		<div class = "infobox">
 			<a id="info" target="_blank"  class="btn btn-info btn-lg infobtn" style="display:none">보러가기</a>
 			<a href="claim" target="_blank"  id="claim" class="btn btn-warning btn-lg infobtn" style="display:none">신고하기</a>
-			<button type="button" class="btn btn-danger btn-lg infobtn" data-toggle="modal" data-target="#myModal">추가하기</button>
+			<a id="add" class="btn btn-danger btn-lg infobtn">추가하기</a>
 		</div>
-		  <!-- Modal -->
-		  <div class="modal fade" id="myModal" role="document">
-		    <div class="modal-dialog modal-sm">
-		      <div class="modal-content">
-		        <div class="modal-header">
-		          <button type="button" class="close" data-dismiss="modal">&times;</button>
-		          <h4 class="modal-title">Modal Header</h4>
-		        </div>
-		        <div class="modal-body">
-		          <p>This is a small modal.</p>
-		        </div>
-		        <div class="modal-footer">
-		          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-		        </div>
-		      </div>
-		    </div>
-		  </div>
+		<div id="mask"></div>
+		<div id="window">
+
+		</div>
+		<script>
+			function wrapWindowByMask(){
+			        //화면의 높이와 너비를 구한다.
+			        var maskHeight = screenHeight;
+			        var maskWidth = screenWidth;
+
+			        //마스크의 높이와 너비를 화면 것으로 만들어 전체 화면을 채운다.
+			        $('#mask').css({'width':maskWidth,'height':maskHeight});
+
+			        //애니메이션 효과
+			        $('#mask').fadeTo("slow",0.3);
+
+			        //창띄우기
+			        center();
+			        $('#window').show();
+
+			        // 스크롤막기
+			        blockWheel();
+			}
+			$('#add').click(function(e){
+				e.preventDefault();
+				wrapWindowByMask();
+			});
+			//검은 막을 눌렀을 때
+			$('#mask').click(function () {
+			    playWheel();
+			    $(this).hide();
+			    $('#window').hide();
+			});
+		</script>
 	</body>
 </html>

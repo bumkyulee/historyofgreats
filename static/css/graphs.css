@@ -1,0 +1,62 @@
+.chart {
+	shape-rendering: crispEdges;
+}
+.mini text {
+	font: 9px sans-serif;
+}
+
+.main text {
+	font: 12px sans-serif;
+}
+
+.miniItem0 {
+	fill: #1abc9c;
+	fill-opacity: .7;
+	stroke-width: 6;
+}
+
+.miniItem1 {
+	fill: #2ecc71;
+	fill-opacity: .7;
+	stroke-width: 6;
+}
+
+.miniItem2 {
+	fill: #3498db;
+	fill-opacity: .7;
+	stroke-width: 6;
+}
+
+.miniItem3 {
+	fill: #9b59b6;
+	fill-opacity: .7;
+	stroke-width: 6;
+}
+
+.miniItem4 {
+	fill: #95a5a6;
+	fill-opacity: .7;
+	stroke-width: 6;
+}
+
+.miniItem5 {
+	fill: #e67e22;
+	fill-opacity: .7;
+	stroke-width: 6;
+}
+
+.yearText{
+	font: 7px sans-serif;
+	fill: #e2e2e2;
+}
+.infobox{
+	position:fixed;
+	z-index:1;
+	top:90%;
+	right:3%;
+	visibility: visible;
+}
+.infobtn{
+	float: left;
+	margin-left: 10px;
+}
