@@ -1,31 +1,32 @@
 <html>
 <head>
-	<link href="{{ url_for('static', filename='css/addbox.css') }}" rel="stylesheet">
-	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
-	<script type="text/javascript" src="//code.jquery.com/jquery-1.10.2.min.js"></script>
-	<script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+	<title>AJAX TEST PAGE</title>
+	<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	<script>
+		function testajax(){
+			$.ajax({
+			            url: '/claim',
+			            type: 'post',
+			            dataType: 'json',
+			            data: {
+			            		'claimtype': '없어요_테스트',
+			            		'msg':'랄라라랄라라라라라라라라'
+			            },
+			            success: function (data) {
+			                console.log(data['resultCode']);
+			            },
+			            error: function(error) {
+			                console.log(error);
+			            }
+			        });
+		}
+	</script>
 </head>
 <body>
-
-	<a href="#" data-toggle="modal" data-target="#login-modal">Login</a>
-
-<div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
-    	  <div class="modal-dialog">
-				<div class="loginmodal-container">
-					<h1>Login to Your Account</h1><br>
-				  <form>
-					<input type="text" name="user" placeholder="Username">
-					<input type="password" name="pass" placeholder="Password">
-					<input type="submit" name="login" class="login loginmodal-submit" value="Login">
-				  </form>
-
-				  <div class="login-help">
-					<a href="#">Register</a> - <a href="#">Forgot Password</a>
-				  </div>
-				</div>
-			</div>
-		  </div>
+	<div class="progress progress-striped active">
+	  <div class="progress-bar" style="width: 100%"></div>
+	</div>
+	<button type="button" class="btn btn-primary" onclick="testajax()">콜하기</button>
 </body>
-
-
 </html>

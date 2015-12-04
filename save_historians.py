@@ -323,6 +323,8 @@ def getinfoBing(schName):
 	       			death = temp
 	       		else:
 	       			pass
+       		if birth=='?' or death =='?':
+       			raise Exception('년도 없음')
 	       	value = [name,birth,death]
 	except Exception, e:
 		value = ['0','0',e.args[0]]
@@ -330,7 +332,7 @@ def getinfoBing(schName):
        	return value
 
 # 인물을 기록한다.
-def addHistory(name,nationality,depth):
+def addHistory(name,nationality):
 	# 인물 검사
 	setWorkSheet()
 	value = getinfoBing(name)
@@ -344,11 +346,14 @@ def addHistory(name,nationality,depth):
 			result['name'] = wikiname
 		else:
 			url = 'http://ko.wikipedia.org/wiki/'+wikiname
-			addOne(value[0],value[1],value[2],nationality,depth,'',url)
+			birth = int(value[1])
+			death = int(value[2])
+			depth = getDepth(nationality,birth,death)
+			addOne(wikiname,birth,death,nationality,depth,'',url)
 			result['resultCode'] = '1' # 성공
 			result['name'] = wikiname
-			result['birth'] = value[1]
-			result['death'] = value[2]
+			result['birth'] = birth
+			result['death'] = death
 			result['nationality'] = nationality
 	return result
 
@@ -386,6 +391,57 @@ def saveClaim(claimtype,msg):
 	except:
 		result['resultCode'] = '0'
 	return result
+
+# 한 명의 Depth를 구한다.
+def getDepth(nationality,birth,death):
+	setWorkSheet()
+	data = worksheet.get_all_values()
+	# 일단 전체 데이터 중 해당 국가의 데이터를 담는다.
+	data_nation = list()
+	depth_max = 0
+	depth_set = 0
+	for row in data[1:]:
+		if row[3] == nationality:
+			data_nation.append(row)
+			row_depth = int(row[4])
+			if depth_max < row_depth:
+				depth_max = row_depth
+
+	if depth_max > 0:
+		stop = False
+		for i in range(1,depth_max):
+			if stop: break
+			depth_random = random.randint(1, depth_max)
+			for row in data_nation:
+				row_depth = int(row[4])
+				row_birth = int(row[1])
+				row_death = int(row[2])
+				if row_depth == depth_random and (row_death < birth or row_birth > death):
+					depth_set = depth_random
+					stop = True
+					if stop: break
+		if depth_set == 0:
+			depth_set = depth_max + 1
+	else:
+		depth_set = 1
+
+	return depth_set
+
+# 전체의 Depth를 구해서 다시 입력한다.
+def setDepthAgain():
+	setWorkSheet()
+	worksheet_backup = sht.worksheet("back_up")
+	data = worksheet_backup.get_all_values()
+	for row in data:
+		name = row[0]
+		nationality =  row[3]
+		addHistory(name,nationality)
+		print name + ' / ' + nationality
+
+setDepthAgain()
+
+
+
 
 ###### [ 시작 ] #####
 #url = 'http://100.daum.net/book/187/list' ## 세계사 100인

@@ -37,8 +37,7 @@ def claim():
 # 테스트용
 @app.route("/test/<nationality>/<name>")
 def test(nationality,name):
-	depth = '1'
-	result =  addHistory(name,nationality,depth)
+	result =  addHistory(name,nationality)
 	return json.dumps(result)
 
 if __name__ == "__main__":
