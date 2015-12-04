@@ -270,20 +270,45 @@ def copyMongoToSheet():
 	setColumn('F',desc,'desc')
 	setColumn('G',url_personal,'url')
 
+# 모든 사람의 위키 이름을 가져온다.
+def getallwikiname():
+	# 구글드라이브연결
+	setWorkSheet()
+	data = worksheet.get_all_values()
+	wikinames = list()
+	for row in data[1:]:
+		name = row[0]
+		wikiname = getinfoBing(name)[0]
+		print name.encode('utf-8') + ' -> ' + wikiname.encode('utf-8') + '\t|\t' + '진행중'
+		wikinames.append(wikiname)
+	setColumn('H',wikinames,'wikiname')
+	return 'success'
+
+# 문자열 찾기 함수
+def findString(text,findstring):
+	result = False
+	for string in findstring:
+		if text.find(string) > -1:
+			result = True
+			break
+	return result
+
 # Bing의 인물검색 정보를 파싱한다.
+# 참고: 파싱해서 가져올 때 텍스트는 유니코드로 가져온다.
 def getinfoBing(schName):
 	try:
 		opener = urllib2.build_opener()
 		opener.addheaders = [('User-agent', 'Mozilla/5.0')]
 		url = u'http://www.bing.com/search?q='+schName
 		url = urllib.quote(url.encode('utf8'), '/:')
+		print url
 		page = opener.open(url)
 	       	soup = BeautifulSoup(page)
 		name = soup.findAll('h2',attrs={'class':' b_entityTitle'})[0].text
 		infobox = soup.find('ul',attrs={'class':'b_vList'}).findAll('li')
 
-	       	birth_strs = ['출생:']
-	       	death_strs = ['사망:']
+	       	birth_strs = ['출생:','Born:']
+	       	death_strs = ['사망:','Died:']
 	       	birth = '?'
 	       	death = '?'
 
@@ -300,10 +325,12 @@ def getinfoBing(schName):
 	       			pass
 	       	value = [name,birth,death]
 	except Exception, e:
-		value = [0,0,e.args[0]]
+		value = ['0','0',e.args[0]]
+		print '인물 정보 파싱 실패: ' + e.args[0]
        	return value
 
 ###### [ 시작 ] #####
 #url = 'http://100.daum.net/book/187/list' ## 세계사 100인
 #url = 'http://100.daum.net/book/130/list' ## 한국사
 #getAll(url)
+getallwikiname()
