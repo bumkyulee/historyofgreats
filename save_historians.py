@@ -440,7 +440,7 @@ def setDepthAgain():
 		addHistory(name,nationality)
 		print name + ' / ' + nationality
 
-setDepthAgain()
+#setDepthAgain()
 
 
 
