@@ -24,7 +24,7 @@ def getSoup(url):
 
 def setWorkSheet():
 	global worksheet
-
+	global sht
 	#다음을 사용하기 전에 발급받은 json키의 client_email로 Spreadsheet를 공유해야 한다.
 	SCOPE = ["https://spreadsheets.google.com/feeds"]
 	#json키 저장해서 써야함.
@@ -37,7 +37,7 @@ def setWorkSheet():
 	#sht  = gc.open("historyofgreats")
 	sht = gc.open_by_url('https://docs.google.com/spreadsheets/d/1MpGW0Hi54_EiIRu-Sx2t1vOgK06p7Hf4ZpWwn4ssHgA/edit')
 	worksheet = sht.worksheet("sheet1")
-	print 'done: setWorkSheet'
+	return worksheet
 
 # 열 단위로 업데이트한다. 열 이름: A,B,C,D,E
 def setColumn(col,values,name):
@@ -329,8 +329,66 @@ def getinfoBing(schName):
 		print '인물 정보 파싱 실패: ' + e.args[0]
        	return value
 
+# 인물을 기록한다.
+def addHistory(name,nationality,depth):
+	# 인물 검사
+	setWorkSheet()
+	value = getinfoBing(name)
+	wikiname = value[0]
+	result = dict()
+	if wikiname == '0':
+		result['resultCode'] = '2' # 파싱 실패
+	else:
+		if hasDuplication(wikiname):
+			result['resultCode'] = '3' # 중복
+			result['name'] = wikiname
+		else:
+			url = 'http://ko.wikipedia.org/wiki/'+wikiname
+			addOne(value[0],value[1],value[2],nationality,depth,'',url)
+			result['resultCode'] = '1' # 성공
+			result['name'] = wikiname
+			result['birth'] = value[1]
+			result['death'] = value[2]
+			result['nationality'] = nationality
+	return result
+
+# 인물 한 명을 더한다.
+def addOne(name,birth,death,nationality,depth,desc,url):
+	data = worksheet.get_all_values()
+	addrow = len(data) + 1
+	worksheet.update_cell(addrow, 1, name)
+	worksheet.update_cell(addrow, 2, birth)
+	worksheet.update_cell(addrow, 3, death)
+	worksheet.update_cell(addrow, 4, nationality)
+	worksheet.update_cell(addrow, 5, depth)
+	worksheet.update_cell(addrow, 6, desc)
+	worksheet.update_cell(addrow, 7, url)
+
+# 겹치는 인물이 있는지 확인한다.
+def hasDuplication(wikiname):
+	try:
+		worksheet.find(wikiname)
+		return True
+	except:
+		return False
+
+# 문의하기를 기록한다.
+def saveClaim(claimtype,msg):
+	result = dict()
+	try:
+		setWorkSheet()
+		worksheet_claim = sht.worksheet("msg")
+		data = worksheet_claim.get_all_values()
+		addrow = len(data) + 1
+		worksheet_claim.update_cell(addrow, 1, claimtype)
+		worksheet_claim.update_cell(addrow, 2, msg)
+		result['resultCode'] = '1'
+	except:
+		result['resultCode'] = '0'
+	return result
+
 ###### [ 시작 ] #####
 #url = 'http://100.daum.net/book/187/list' ## 세계사 100인
 #url = 'http://100.daum.net/book/130/list' ## 한국사
 #getAll(url)
-getallwikiname()
+#getallwikiname()
