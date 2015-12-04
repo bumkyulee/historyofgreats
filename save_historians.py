@@ -408,18 +408,20 @@ def getDepth(nationality,birth,death):
 				depth_max = row_depth
 
 	if depth_max > 0:
-		stop = False
 		for i in range(1,depth_max):
-			if stop: break
 			depth_random = random.randint(1, depth_max)
+			stop = True
 			for row in data_nation:
 				row_depth = int(row[4])
 				row_birth = int(row[1])
 				row_death = int(row[2])
-				if row_depth == depth_random and (row_death < birth or row_birth > death):
-					depth_set = depth_random
-					stop = True
-					if stop: break
+				# 겹치는 애들이 있으면
+				if row_depth == depth_random and not (row_death < birth or row_birth > death):
+					stop = False
+					break
+			if stop:
+				depth_set = depth_random
+				break
 		if depth_set == 0:
 			depth_set = depth_max + 1
 	else:

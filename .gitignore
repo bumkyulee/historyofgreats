@@ -9,3 +9,4 @@ include
 
 # key file
 API Project-43d918462212.json
+*.pyc
