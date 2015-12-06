@@ -395,14 +395,14 @@ def addHistory(name,nationality):
 		result['resultCode'] = '3' # 파싱 실패
 		result['resultMsg'] = '위키에서 데이터를 찾을 수 없습니다. <br/> 출생-사망년도를 알려주시면 수동입력하겠습니다' # 파싱 실패
 	else:
+		birth = int(value[1])
+		death = int(value[2])
 		if hasDuplication(wikiname):
 			result['resultCode'] = '2' # 중복
-			result['resultMsg'] = '중복데이터입니다'
+			result['resultMsg'] = str(birth)+'~'+str(death)
 			result['wikiname'] = wikiname
 		else:
 			url = 'http://ko.wikipedia.org/wiki/'+wikiname
-			birth = int(value[1])
-			death = int(value[2])
 			depth = getDepth(nationality,birth,death)
 			addOne(wikiname,birth,death,nationality,depth,'',url)
 			result['resultCode'] = '1' # 성공

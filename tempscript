@@ -1,9 +1,0 @@
-import urllib
-import urllib2
-from BeautifulSoup import BeautifulSoup
-opener = urllib2.build_opener()
-opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-url ='https://ko.wikipedia.org/wiki/%EC%9D%B4%EC%88%9C%EC%8B%A0'
-page = opener.open(url)
-soup = BeautifulSoup(page)
-infobox = soup.find('table',attrs={'class':'infobox'})

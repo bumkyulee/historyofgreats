@@ -766,8 +766,11 @@
 				            	  }
 				            	  else if (resultCode == '2') {
 				            	  	sendAddResultInit();
-						$('#searchname').text(data['wikiname']);
-						$('#result-fail-duplicate').show();
+						  $('#searchname').text(data['wikiname']);
+						  $('#result-fail-duplicate').show();
+						  $('#name').val(data['wikiname']);
+						  $('#lifetime-form').show();
+						  $('#lifetime-input').val(data['resultMsg']);
 				            	  }
 				            	  else{
 				            	  	sendAddResultInit();
