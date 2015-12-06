@@ -380,8 +380,8 @@ def getinfoWiki(schName):
    			raise Exception('년도 없음: ' + birth + ' / ' + death)
 	       	value = [name,birth,death]
 	except Exception, e:
-		value = ['0','0',e.args[0]]
-		print '인물 정보 파싱 실패: ' + e.args[0]
+		value = ['0','0','Exception']
+		print '인물 정보 파싱 실패'
        	return value
 
 # 인물을 기록한다.
