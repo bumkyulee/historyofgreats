@@ -38,6 +38,13 @@ def add():
 	result =  addHistory(name,nationality)
 	return json.dumps(result)
 
+# 테스트용
+@app.route("/test/<name>")
+def test(name):
+	result = getinfoWiki(name)
+	return json.dumps(result)
+
+
 if __name__ == "__main__":
  	app.run('0.0.0.0',8080,debug=True)
 

@@ -285,11 +285,15 @@ def getallwikiname():
 	return 'success'
 
 # 문자열 찾기 함수
-def findString(text,findstring):
+def findString(text,findstring,notlist = list()):
 	result = False
 	for string in findstring:
 		if text.find(string) > -1:
 			result = True
+			break
+	for string in notlist:
+		if text.find(string) > -1:
+			result = False
 			break
 	return result
 
@@ -325,6 +329,46 @@ def getinfoBing(schName):
 	       			pass
        		if birth=='?' or death =='?':
        			raise Exception('년도 없음')
+	       	value = [name,birth,death]
+	except Exception, e:
+		value = ['0','0',e.args[0]]
+		print '인물 정보 파싱 실패: ' + e.args[0]
+       	return value
+
+def getinfoWiki(schName):
+	try:
+		opener = urllib2.build_opener()
+		opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+		url = 'http://ko.wikipedia.org/wiki/'+schName.encode('utf-8')
+		page = opener.open(url)
+	       	soup = BeautifulSoup(page)
+	       	infobox = soup.find('table').findAll('tr')
+
+	       	birth = '?'
+	       	death = '?'
+
+	       	birth_strs = ['출생','출생일']
+	       	birth_strs_not = ['출생지']
+
+	       	death_strs = ['사망','사망일']
+		death_strs_not = ['사망지']
+
+	       	#getFullName
+	       	name = soup.find('h1',attrs={'id':'firstHeading'}).text
+
+	       	#InfoBox parsing
+	       	for data in infobox:
+	       		label = data.find('th')
+	       		if label is not None:
+	       			text = label.text.encode('utf-8')
+		       		if findString(text,birth_strs,birth_strs_not):
+		       			birth = data.td.text.split(u'년')[0]
+		       		elif findString(text,death_strs,death_strs_not):
+		       			death = data.td.text.split(u'년')[0]
+		       		else:
+		       			pass
+   		if birth=='?' or death =='?':
+   			raise Exception('년도 없음')
 	       	value = [name,birth,death]
 	except Exception, e:
 		value = ['0','0',e.args[0]]
