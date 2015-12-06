@@ -278,7 +278,7 @@ def getallwikiname():
 	wikinames = list()
 	for row in data[1:]:
 		name = row[0]
-		wikiname = getinfoBing(name)[0]
+		wikiname = getinfoWiki(name)[0]
 		print name.encode('utf-8') + ' -> ' + wikiname.encode('utf-8') + '\t|\t' + '진행중'
 		wikinames.append(wikiname)
 	setColumn('H',wikinames,'wikiname')
@@ -339,7 +339,9 @@ def getinfoWiki(schName):
 	try:
 		opener = urllib2.build_opener()
 		opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-		url = 'http://ko.wikipedia.org/wiki/'+schName.encode('utf-8')
+		schName = schName.replace(' ','_').encode('utf-8')
+		url = 'http://ko.wikipedia.org/wiki/'+schName
+		print url
 		page = opener.open(url)
 	       	soup = BeautifulSoup(page)
 	       	infobox = soup.find('table').findAll('tr')
@@ -353,22 +355,29 @@ def getinfoWiki(schName):
 	       	death_strs = ['사망','사망일']
 		death_strs_not = ['사망지']
 
+		birth_special = ['생애']
+
 	       	#getFullName
 	       	name = soup.find('h1',attrs={'id':'firstHeading'}).text
 
 	       	#InfoBox parsing
 	       	for data in infobox:
-	       		label = data.find('th')
+	       		label = data.th
 	       		if label is not None:
 	       			text = label.text.encode('utf-8')
+	       			print text
 		       		if findString(text,birth_strs,birth_strs_not):
 		       			birth = data.td.text.split(u'년')[0]
 		       		elif findString(text,death_strs,death_strs_not):
 		       			death = data.td.text.split(u'년')[0]
+		       		elif findString(text,birth_special):
+		       			birthdeath = data.td.text.split('~ ')
+		       			birth = birthdeath[0].split(u'년')[0]
+		       			death = birthdeath[1].split(u'년')[0]
 		       		else:
 		       			pass
    		if birth=='?' or death =='?':
-   			raise Exception('년도 없음')
+   			raise Exception('년도 없음: ' + birth + ' / ' + death)
 	       	value = [name,birth,death]
 	except Exception, e:
 		value = ['0','0',e.args[0]]
@@ -379,7 +388,7 @@ def getinfoWiki(schName):
 def addHistory(name,nationality):
 	# 인물 검사
 	setWorkSheet()
-	value = getinfoBing(name)
+	value = getinfoWiki(name)
 	wikiname = value[0]
 	result = dict()
 	if wikiname == '0':
