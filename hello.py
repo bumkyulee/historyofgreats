@@ -16,6 +16,10 @@ from save_historians import *
 
 app = Flask(__name__)
 
+@app.route("/")
+def main():
+	return 'nginx is running'
+
 @app.route("/connect")
 def connect():
 	worksheet = setWorkSheet()
@@ -36,7 +40,6 @@ def add():
 	nationality = request.form.get('nationality')
 	result =  addHistory(name,nationality)
 	return json.dumps(result)
-
 
 if __name__ == "__main__":
  	app.run('0.0.0.0',80)
