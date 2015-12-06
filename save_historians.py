@@ -341,10 +341,9 @@ def getinfoWiki(schName):
 		opener.addheaders = [('User-agent', 'Mozilla/5.0')]
 		schName = schName.replace(' ','_').encode('utf-8')
 		url = 'http://ko.wikipedia.org/wiki/'+schName
-		print url
 		page = opener.open(url)
 	       	soup = BeautifulSoup(page)
-	       	infobox = soup.find('table').findAll('tr')
+	       	infobox = soup.findAll('tr')
 
 	       	birth = '?'
 	       	death = '?'
@@ -375,8 +374,9 @@ def getinfoWiki(schName):
 		       			death = birthdeath[1].split(u'년')[0]
 		       		else:
 		       			pass
-   		if birth=='?' or death =='?':
-   			raise Exception('년도 없음: ' + birth + ' / ' + death)
+		#다 돌고 나왔는데 생년 정보가 없을 때
+		if birth=='?' or death =='?':
+			raise Exception('년도 없음: ' + birth + ' / ' + death)
 	       	value = [name,birth,death]
 	except Exception, e:
 		schName = schName.replace(' ','_')
