@@ -365,7 +365,6 @@ def getinfoWiki(schName):
 	       		label = data.th
 	       		if label is not None:
 	       			text = label.text.encode('utf-8')
-	       			print text
 		       		if findString(text,birth_strs,birth_strs_not):
 		       			birth = data.td.text.split(u'년')[0]
 		       		elif findString(text,death_strs,death_strs_not):
@@ -380,7 +379,9 @@ def getinfoWiki(schName):
    			raise Exception('년도 없음: ' + birth + ' / ' + death)
 	       	value = [name,birth,death]
 	except Exception, e:
-		value = ['0','0','Exception']
+		schName = schName.replace(' ','_')
+		url = 'http://ko.wikipedia.org/wiki/'+schName
+		value = ['0','0',url]
 		print '인물 정보 파싱 실패'
        	return value
 
@@ -393,7 +394,8 @@ def addHistory(name,nationality):
 	result = dict()
 	if wikiname == '0':
 		result['resultCode'] = '3' # 파싱 실패
-		result['resultMsg'] = '위키에서 데이터를 찾을 수 없습니다. <br/> 출생-사망년도를 알려주시면 수동입력하겠습니다' # 파싱 실패
+		result['resultMsg'] = '위키에서 올바른 데이터를 찾을 수 없습니다. <br/> 여기를 눌러 페이지를 확인하세요' # 파싱 실패
+		result['url'] = value[2] # 파싱 실패
 	else:
 		birth = int(value[1])
 		death = int(value[2])

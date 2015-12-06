@@ -570,8 +570,8 @@
 					<span id="searchname" style="color:gray;">홍길동</span>
 					]으로 검색해보세요
 				</p>
-				<p class="text-danger" id="result-fail-noresult" style="text-align: center; display:none">
-					검색 결과가 조회되지 않습니다.
+				<p class="text-danger" id="result-fail-noresult-p" style="text-align: center; display:none">
+					<a href="#" id="result-fail-noresult" target="_blank">정보를 찾을 수 없습니다</a>
 				</p>
 				</form>
 			      </div>
@@ -684,7 +684,7 @@
 			}
 			function addInit(){
 				$('#result-fail-duplicate').hide();
-				$('#result-fail-noresult').hide();
+				$('#result-fail-noresult-p').hide();
 				$('#lifetime-form').hide();
 				$('#progress-bar-add').hide();
 				$('#result-success-add').hide();
@@ -739,7 +739,7 @@
 				// 중복
 				$('#result-fail-duplicate').hide();
 				// 실패
-				$('#result-fail-noresult').hide();
+				$('#result-fail-noresult-p').hide();
 			}
 			// 추가하기 클릭
 			function sendAdd(){
@@ -774,8 +774,9 @@
 				            	  }
 				            	  else{
 				            	  	sendAddResultInit();
-				            	  	$('#result-fail-noresult').show();
+				            	  	$('#result-fail-noresult-p').show();
 				            	  	$('#result-fail-noresult').html(data['resultMsg']);
+				            	  	$('#result-fail-noresult').attr('href',data['url']);
 				            	  }
 					  $('#progress-bar-add').hide();
 					  console.log(data);
@@ -813,19 +814,6 @@
 				            }
 				        });
 			}
-
-
-
-
-
-
-
-
-
-
-
-
-
 		</script>
 	</body>
 </html>
