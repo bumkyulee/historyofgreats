@@ -31,6 +31,7 @@
 		var data = {{ data|tojson }};
 		var items = new Array();
 		var lanes = new Array();
+		var isMobile = detectMobile();
 		for (var i = data.length - 1; i > 0; i--) {
 			var arrTemp = new Object();
 			arrTemp['depth'] = Number(data[i][4]);
@@ -59,13 +60,6 @@
 			};
 			return lv;
 		}
-
-		// 설명
-		var msg = '1. 누구랑 누구랑 같은 시대에 살았을까요?\n';
-		      msg += '2. 이름을 누르면 설명으로 이동합니다.\n';
-		      msg += '3. 누구나 인물을 추가할 수 있습니다.\n';
-		      msg += '4. 추가문의: bumkyu.lee@gmail.com\n';
-		alert(msg);
 
 		// 국가의 순서 구하기
 		function getNationalitySeq(nationality){
@@ -122,7 +116,7 @@
 		    screenHeight = w.innerHeight|| e.clientHeight|| g.clientHeight;
 
 		    screenWidth = 4000
-		    screenHeight = 3000
+		    screenHeight = 18*getSumMaxDepth()
 
 		var m = [10, 10, 10, 10], //top right bottom left
 			w = screenWidth - m[1] - m[3],
@@ -247,8 +241,6 @@
 		var y_move = false;
 		$(window).scroll(function(){
 			y_move = y_position != parseInt($(window).scrollTop());
-			console.log(y_position + " / " + $(window).scrollTop());
-			console.log(y_move);
 			y_position = parseInt($(window).scrollTop());
 			if (opacity && !y_move) {
 				main.selectAll("#names")
@@ -373,10 +365,10 @@
 				        <input type="text" class="form-control" id="name" placeholder="홍길동">
 				      </div>
 				    </div>
-				    <div class="form-group" id="lifetime" style="display:none">
+				    <div class="form-group" id="lifetime-form" style="display:none">
 				      <label for="lifetime" class="col-lg-2 control-label">생애</label>
 				      <div class="col-lg-10">
-				        <input type="text" class="form-control" id="lifetime" placeholder="1985~2015">
+				        <input type="text" class="form-control" id="lifetime-input" placeholder="1985~2015">
 				      </div>
 				    </div>
 				    <div class="form-group">
@@ -516,8 +508,7 @@
 					<option value="자메이카">자메이카</option>
 					<option value="잠비아">잠비아</option>
 					<option value="적도 기니">적도 기니</option>
-					<option value="조지아">조지아</option>
-					<option value="중국">중국</option>
+					<option value="조지아">조지아</option>구
 					<option value="중국">중국</option>
 					<option value="중앙아프리카 공화국">중앙아프리카 공화국</option>
 					<option value="지부티">지부티</option>
@@ -574,26 +565,29 @@
 				      </div>
 				    </div>
 				 </fieldset>
-				<p class="text-danger" id="result-fail" style="text-align: center; display:none">
+				<p class="text-danger" id="result-fail-duplicate" style="text-align: center; display:none">
 					이미 있는 이름입니다 [
 					<span id="searchname" style="color:gray;">홍길동</span>
 					]으로 검색해보세요
 				</p>
+				<p class="text-danger" id="result-fail-noresult" style="text-align: center; display:none">
+					검색 결과가 조회되지 않습니다.
+				</p>
 				</form>
 			      </div>
 			      <div class="modal-footer">
-				<div id="progress-bar" class="progress progress-striped active" style = "display:none; height:15px">
-				  <div class="progress-bar" style="width: 100%;">
-				  	<span id="progress-bar-msg" style="font-size:12px;  vertical-align:middle">서버통신중입니다</span>
+				<div id="progress-bar-add" class="progress progress-striped active" style = "display:none; height:15px">
+				  <div class="progress-bar" style="width: 100%; display:table;">
+				  	<div style="display:table-cell; vertical-align:middle;">
+				  		<span id="progress-bar-msg-add" style="font-size:12px;">서버통신중입니다</span>
+				 	</div>
 				  </div>
 				</div>
-				<p class="text-info" id="result-success" style="text-align: center; display:none">
-				<strong>
-					[ 등록 완료 ]
-				</strong>
+				<p id="result-success-add" style="text-align: center; display:none">
+					<a href="http://bit.ly/1R2tZU8" target="_blank">[ 등록 정보 보러가기 ]</a>
 				</p>
 			        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="addClose()">닫기</button>
-			        <button type="button" id ="btn-save" class="btn btn-primary" onclick="addWarning('임꺽정');">추가하기</button>
+			        <button type="button" id ="btn-save" class="btn btn-primary" onclick="sendAdd();">추가하기</button>
 			      </div>
 			    </div>
 			  </div>
@@ -616,9 +610,9 @@
 				      <label for="claimtype" class="col-lg-2 control-label">말머리</label>
 				      <div class="col-lg-10">
 				        <select class="form-control" id="claimtype">
-				          <option value ='1'>고마워요</option>
-				          <option value ='2'>할 말 있어요</option>
-				          <option value ='3'>데이터가 이상해요</option>
+				          <option value ='고마워요'>고마워요</option>
+				          <option value ='할 말 있어요'>할 말 있어요</option>
+				          <option value ='데이터가 이상해요'>데이터가 이상해요</option>
 				        </select>
 				      </div>
 				    </div>
@@ -632,13 +626,18 @@
 				</form>
 			      </div>
 			      <div class="modal-footer">
-				<div id="progress-bar" class="progress progress-striped active" style = "display:none; height:15px">
-				  <div class="progress-bar" style="width: 100%;">
-				  	<span id="progress-bar-msg" style="font-size:13px;  vertical-align:middle">서버통신중입니다</span>
+				<div id="progress-bar-claim" class="progress progress-striped active" style = "display:none; height:15px;">
+				  <div class="progress-bar" style="width: 100%; display:table;">
+				  	<div style="display:table-cell; vertical-align:middle;">
+				  		<span id="progress-bar-msg-claim" style="font-size:12px;">서버통신중입니다</span>
+				 	</div>
 				  </div>
 				</div>
+				<p id="result-success-claim" style="text-align: center; display:none">
+					<a href="http://bit.ly/21GjJ7L" target="_blank">[ 접수된 메시지 보러가기 ]</a>
+				</p>
 			        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="claimClose()">닫기</button>
-			        <button type="button" class="btn btn-primary" onclick="alert('보내기 작업중');">보내기</button>
+			        <button type="button" class="btn btn-primary" onclick="sendClaim()">보내기</button>
 			      </div>
 			    </div>
 			  </div>
@@ -673,17 +672,24 @@
 			        center('addwindow');
 			        $('#addwindow').show();
 			}
+			var refresh = false;
 			function addClose(){
 				maskClose();
 				$('#addwindow').hide();
 				addInit();
+				if(refresh) {
+					alert('결과 반영을 위해 데이터를 다시 로딩합니다.');
+					window.location.href='/connect';
+				}
 			}
 			function addInit(){
-				$('#result-fail').hide();
+				$('#result-fail-duplicate').hide();
+				$('#result-fail-noresult').hide();
+				$('#lifetime-form').hide();
+				$('#progress-bar-add').hide();
+				$('#result-success-add').hide();
 			}
 			function addWarning(searchname){
-				$('#searchname').text(searchname);
-				$('#result-fail').show();
 			}
 			function claimOpen(){
 			        // 모든 창 닫기
@@ -703,12 +709,13 @@
 			}
 			function claimInit(){
 				$('#claimtext').val('');
-				$("#claimtype").val('1');
+				$("#claimtype").val('고마워요');
+				$('#progress-bar-claim').hide();
+				$('#result-success-claim').hide();
 			}
 			function allClose(){
 				addClose();
 				claimClose();
-				alert('버튼 작업중입니다');
 			}
 			// 추가 버튼 클릭 이벤트
 			$('#add').click(function(e){
@@ -724,6 +731,98 @@
 			$('#mask').click(function () {
 				allClose();
 			});
+			// 추가하기 결과 메시지 초기화
+			function sendAddResultInit(){
+				// 성공
+				$('#result-success-add').hide();
+				$('#lifetime-form').hide();
+				// 중복
+				$('#result-fail-duplicate').hide();
+				// 실패
+				$('#result-fail-noresult').hide();
+			}
+			// 추가하기 클릭
+			function sendAdd(){
+				var name = $('#name').val();
+				var nationality = $('#nationality').val();
+				$('#progress-bar-add').show();
+				$.ajax({
+				            url: '/add',
+				            type: 'post',
+				            dataType: 'json',
+				            data: {
+				            		'name': name,
+				            		'nationality':nationality
+				            },
+				            success: function (data) {
+				            	  var resultCode = data['resultCode'];
+				            	  if (resultCode == '1') {
+				            	  	sendAddResultInit();
+						  $('#result-success-add').show();
+						  $('#lifetime-form').show();
+						  $('#name').val(data['wikiname']);
+						  $('#lifetime-input').val(data['resultMsg']);
+						  refresh = true;
+				            	  }
+				            	  else if (resultCode == '2') {
+				            	  	sendAddResultInit();
+						$('#searchname').text(data['wikiname']);
+						$('#result-fail-duplicate').show();
+				            	  }
+				            	  else{
+				            	  	sendAddResultInit();
+				            	  	$('#result-fail-noresult').show();
+				            	  	$('#result-fail-noresult').html(data['resultMsg']);
+				            	  }
+					  $('#progress-bar-add').hide();
+					  console.log(data);
+				            },
+				            error: function(error) {
+				                alert('서버 통신 실패');
+				            }
+				        });
+			}
+			// Ajax - 문의하기 버튼
+			function sendClaim(){
+				var claimtype = $('#claimtype').val();
+				var claimtext = $('#claimtext').val();
+				$('#progress-bar-claim').show();
+				$.ajax({
+				            url: '/claim',
+				            type: 'post',
+				            dataType: 'json',
+				            data: {
+				            		'claimtype': claimtype,
+				            		'msg':claimtext
+				            },
+				            success: function (data) {
+				            	  if (data['resultCode'] == '1') {
+						  $('#progress-bar-claim').hide();
+						  $('#claimtext').val('완료되었습니다');
+						  $('#result-success-claim').show();
+				            	  }
+				            	  else {
+				            	  	alert(data['resultMsg']);
+				            	  }
+				            },
+				            error: function(error) {
+				                alert('서버 통신 실패');
+				            }
+				        });
+			}
+
+
+
+
+
+
+
+
+
+
+
+
+
 		</script>
 	</body>
 </html>

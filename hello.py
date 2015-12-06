@@ -23,10 +23,6 @@ def connect():
 
 	return render_template('graphs.html',data=data)
 
-@app.route("/add")
-def add():
-	return render_template('add.html')
-
 @app.route("/claim", methods=["POST"])
 def claim():
 	claimtype = request.form.get('claimtype')
@@ -35,8 +31,10 @@ def claim():
 	return json.dumps(result)
 
 # 테스트용
-@app.route("/test/<nationality>/<name>")
-def test(nationality,name):
+@app.route("/add", methods=["POST"])
+def add():
+	name = request.form.get('name')
+	nationality = request.form.get('nationality')
 	result =  addHistory(name,nationality)
 	return json.dumps(result)
 

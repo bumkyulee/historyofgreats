@@ -339,11 +339,13 @@ def addHistory(name,nationality):
 	wikiname = value[0]
 	result = dict()
 	if wikiname == '0':
-		result['resultCode'] = '2' # 파싱 실패
+		result['resultCode'] = '3' # 파싱 실패
+		result['resultMsg'] = '위키에서 데이터를 찾을 수 없습니다. <br/> 출생-사망년도를 알려주시면 수동입력하겠습니다' # 파싱 실패
 	else:
 		if hasDuplication(wikiname):
-			result['resultCode'] = '3' # 중복
-			result['name'] = wikiname
+			result['resultCode'] = '2' # 중복
+			result['resultMsg'] = '중복데이터입니다'
+			result['wikiname'] = wikiname
 		else:
 			url = 'http://ko.wikipedia.org/wiki/'+wikiname
 			birth = int(value[1])
@@ -351,10 +353,8 @@ def addHistory(name,nationality):
 			depth = getDepth(nationality,birth,death)
 			addOne(wikiname,birth,death,nationality,depth,'',url)
 			result['resultCode'] = '1' # 성공
-			result['name'] = wikiname
-			result['birth'] = birth
-			result['death'] = death
-			result['nationality'] = nationality
+			result['wikiname'] = wikiname
+			result['resultMsg'] = str(birth)+'~'+str(death)
 	return result
 
 # 인물 한 명을 더한다.
@@ -388,8 +388,10 @@ def saveClaim(claimtype,msg):
 		worksheet_claim.update_cell(addrow, 1, claimtype)
 		worksheet_claim.update_cell(addrow, 2, msg)
 		result['resultCode'] = '1'
+		result['resultMsg'] = '남겨두었습니다'
 	except:
 		result['resultCode'] = '0'
+		result['resultMsg'] = '서버 통신에 실패했습니다'
 	return result
 
 # 한 명의 Depth를 구한다.
@@ -416,7 +418,7 @@ def getDepth(nationality,birth,death):
 				row_birth = int(row[1])
 				row_death = int(row[2])
 				# 겹치는 애들이 있으면
-				if row_depth == depth_random and not (row_death < birth or row_birth > death):
+				if row_depth == depth_random and not ((row_death+100) < birth or row_birth > (death+100)):
 					stop = False
 					break
 			if stop:
