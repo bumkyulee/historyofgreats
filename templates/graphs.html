@@ -693,6 +693,7 @@
 				$('#nationality-form').hide();
 				$('#name').val('');
 				$('#btn-save').text('추가하기');
+				$('#btn-save').attr('onclick', 'sendAdd()');
 			}
 			function addWarning(searchname){
 			}
@@ -782,6 +783,7 @@
 						  $('#nationality').val(data['nationality']);
 						  $('#result-success-a').attr('href',data['url']);
 						  $('#btn-save').text('또 추가하기');
+						   $('#btn-save').attr('onclick', ' addInit()');
 						  refresh = true;
 				            	  }
 				            	  else if (resultCode == '2') {
@@ -793,6 +795,8 @@
 						  $('#lifetime-input').val(data['resultMsg']);
 						  $('#nationality-form').show();
 						  $('#nationality').val(data['nationality']);
+						  $('#btn-save').text('다시하기');
+						   $('#btn-save').attr('onclick', ' addInit()');
 				            	  }
 				            	  else{
 				            	  	sendAddResultInit();

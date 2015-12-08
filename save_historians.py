@@ -356,13 +356,19 @@ def getinfoWiki(schName):
 				temp = getNationality(a)
 				if temp:
 					nationality = tranNationality(temp)
-			if findString(a,['년']):
-				if not birth:
-					birth = int(a.split('년')[0])
-				elif not death:
-					death = int(a.split('년')[0])
-			if birth and death and nationality:
-				break
+					break
+
+		for p in soup.findAll('p'):
+			if p.b is not None and p.text.find('~') > -1:
+				for a in p.findAll('a'):
+					a = a.text.encode('utf-8')
+					if findString(a,['년']):
+						if not birth:
+							birth = int(a.split('년')[0])
+						elif not death:
+							death = int(a.split('년')[0])
+						if birth and death:
+							break
 
 		if not nationality:
 			nationality = '기타'
@@ -412,7 +418,7 @@ def getinfoWiki(schName):
 
 # 예전 국가를 검색한다.
 def tranNationality(nation):
-	if findString(nation,['조선','고려']):
+	if findString(nation,['조선','고려','대한']):
 		nation = '한국'
 	elif findString(nation,['로마']):
 		nation = '이탈리아'
@@ -427,6 +433,7 @@ def getNationality(nation):
 	nationalities += ['조선','고려']
 	nationalities += ['로마']
 	nationalities += ['중화인민공화국']
+	nationalities += ['대한']
 	for n in nationalities:
 		if nation.find(n) > -1:
 			return n
