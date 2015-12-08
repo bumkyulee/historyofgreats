@@ -358,9 +358,9 @@ def getinfoWiki(schName):
 					nationality = tranNationality(temp)
 			if findString(a,['년']):
 				if not birth:
-					birth = a.split('년')[0]
+					birth = int(a.split('년')[0])
 				elif not death:
-					death = a.split('년')[0]
+					death = int(a.split('년')[0])
 			if birth and death and nationality:
 				break
 
@@ -401,6 +401,7 @@ def getinfoWiki(schName):
 			#다 돌고 나왔는데 생년 정보가 없을 때
 			if birth=='?' or death =='?':
 				raise Exception('년도 없음: ' + birth + ' / ' + death)
+
 	       	value = [name,birth,death,nationality,url]
 	except Exception, e:
 		schName = schName.replace(' ','_')
