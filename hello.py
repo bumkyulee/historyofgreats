@@ -20,8 +20,8 @@ app = Flask(__name__)
 def main():
 	return 'nginx is running'
 
-@app.route("/connect")
-def connect():
+@app.route("/historyofgreats")
+def historyofgreats():
 	worksheet = setWorkSheet()
 	data = worksheet.get_all_values()
 
