@@ -371,7 +371,7 @@
 				        <input type="text" class="form-control" id="lifetime-input" placeholder="1985~2015">
 				      </div>
 				    </div>
-				    <div class="form-group">
+				    <div class="form-group" id="nationality-form" style="display:none">
 				      <label for="nationality" class="col-lg-2 control-label">국가</label>
 				      <div class="col-lg-10">
 				        <select class="form-control" id="nationality">
@@ -579,12 +579,14 @@
 				<div id="progress-bar-add" class="progress progress-striped active" style = "display:none; height:15px">
 				  <div class="progress-bar" style="width: 100%; display:table;">
 				  	<div style="display:table-cell; vertical-align:middle;">
-				  		<span id="progress-bar-msg-add" style="font-size:12px;">서버통신중입니다</span>
+				  		<a href="http://bit.ly/1R2tZU8" target="_blank">
+				  			<span id="progress-bar-msg-add" style="font-size:12px; color:white">서버통신중입니다</span>
+				  		</a>
 				 	</div>
 				  </div>
 				</div>
 				<p id="result-success-add" style="text-align: center; display:none">
-					<a href="http://bit.ly/1R2tZU8" target="_blank">[ 등록 정보 보러가기 ]</a>
+					<a href="#" id="result-success-a" target="_blank">[ 등록 완료! ]<br/>정보 보러가기</a>
 				</p>
 			        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="addClose()">닫기</button>
 			        <button type="button" id ="btn-save" class="btn btn-primary" onclick="sendAdd();">추가하기</button>
@@ -688,6 +690,9 @@
 				$('#lifetime-form').hide();
 				$('#progress-bar-add').hide();
 				$('#result-success-add').hide();
+				$('#nationality-form').hide();
+				$('#name').val('');
+				$('#btn-save').text('추가하기');
 			}
 			function addWarning(searchname){
 			}
@@ -731,6 +736,12 @@
 			$('#mask').click(function () {
 				allClose();
 			});
+			// focus in / out 상황에서 스크롤 막기
+			$('#name').focusin(function() { playWheel(); })
+			$('#name').focusout(function() { blockWheel(); })
+			$('#claimtext').focusin(function() { playWheel(); })
+			$('#claimtext').focusout(function() { blockWheel(); })
+
 			// 추가하기 결과 메시지 초기화
 			function sendAddResultInit(){
 				// 성공
@@ -744,15 +755,14 @@
 			// 추가하기 클릭
 			function sendAdd(){
 				var name = $('#name').val();
-				var nationality = $('#nationality').val();
+				if (name == '') { alert('값이 없습니다'); return }
 				$('#progress-bar-add').show();
 				$.ajax({
 				            url: '/add',
 				            type: 'post',
 				            dataType: 'json',
 				            data: {
-				            		'name': name,
-				            		'nationality':nationality
+				            		'name': name
 				            },
 				            success: function (data) {
 				            	  var resultCode = data['resultCode'];
@@ -760,8 +770,12 @@
 				            	  	sendAddResultInit();
 						  $('#result-success-add').show();
 						  $('#lifetime-form').show();
+						  $('#nationality-form').show();
 						  $('#name').val(data['wikiname']);
 						  $('#lifetime-input').val(data['resultMsg']);
+						  $('#nationality').val(data['nationality']);
+						  $('#result-success-a').attr('href',data['url']);
+						  $('#btn-save').text('또 추가하기');
 						  refresh = true;
 				            	  }
 				            	  else if (resultCode == '2') {
@@ -771,6 +785,8 @@
 						  $('#name').val(data['wikiname']);
 						  $('#lifetime-form').show();
 						  $('#lifetime-input').val(data['resultMsg']);
+						  $('#nationality-form').show();
+						  $('#nationality').val(data['nationality']);
 				            	  }
 				            	  else{
 				            	  	sendAddResultInit();

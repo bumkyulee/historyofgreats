@@ -343,73 +343,121 @@ def getinfoWiki(schName):
 		url = 'http://ko.wikipedia.org/wiki/'+schName
 		page = opener.open(url)
 	       	soup = BeautifulSoup(page)
-	       	infobox = soup.findAll('tr')
-
-	       	birth = '?'
-	       	death = '?'
-
-	       	birth_strs = ['출생','출생일']
-	       	birth_strs_not = ['출생지']
-
-	       	death_strs = ['사망','사망일']
-		death_strs_not = ['사망지']
-
-		birth_special = ['생애']
 
 	       	#getFullName
 	       	name = soup.find('h1',attrs={'id':'firstHeading'}).text
 
-	       	#InfoBox parsing
-	       	for data in infobox:
-	       		label = data.th
-	       		if label is not None:
-	       			text = label.text.encode('utf-8')
-		       		if findString(text,birth_strs,birth_strs_not):
-		       			birth = data.td.text.split(u'년')[0]
-		       		elif findString(text,death_strs,death_strs_not):
-		       			death = data.td.text.split(u'년')[0]
-		       		elif findString(text,birth_special):
-		       			birthdeath = data.td.text.split('~ ')
-		       			birth = birthdeath[0].split(u'년')[0]
-		       			death = birthdeath[1].split(u'년')[0]
-		       		else:
-		       			pass
-		#다 돌고 나왔는데 생년 정보가 없을 때
-		if birth=='?' or death =='?':
-			raise Exception('년도 없음: ' + birth + ' / ' + death)
-	       	value = [name,birth,death]
+	       	birth = False
+		death = False
+		nationality = False
+		for a in soup.findAll('a'):
+			a = a.text.encode('utf-8')
+			if not nationality:
+				temp = getNationality(a)
+				if temp:
+					nationality = tranNationality(temp)
+			if findString(a,['년']):
+				if not birth:
+					birth = a.split('년')[0]
+				elif not death:
+					death = a.split('년')[0]
+			if birth and death and nationality:
+				break
+
+		if not nationality:
+			nationality = '기타'
+		nationality = nationality.decode('utf-8')
+
+		#그래도 출생-사망 년도를 못 찾았으면
+		if not birth or not death:
+		       	#생년월일 찾기
+		       	birth = '?'
+		       	death = '?'
+
+		       	birth_strs = ['출생','출생일']
+		       	birth_strs_not = ['출생지']
+
+		       	death_strs = ['사망','사망일']
+			death_strs_not = ['사망지']
+
+			birth_special = ['생애']
+
+	       		infobox = soup.findAll('tr')
+		       	#InfoBox parsing
+		       	for data in infobox:
+		       		label = data.th
+		       		if label is not None:
+		       			text = label.text.encode('utf-8')
+			       		if findString(text,birth_strs,birth_strs_not):
+			       			birth = data.td.text.split(u'년')[0]
+			       		elif findString(text,death_strs,death_strs_not):
+			       			death = data.td.text.split(u'년')[0]
+			       		elif findString(text,birth_special):
+			       			birthdeath = data.td.text.split('~ ')
+			       			birth = birthdeath[0].split(u'년')[0]
+			       			death = birthdeath[1].split(u'년')[0]
+			       		else:
+			       			pass
+			#다 돌고 나왔는데 생년 정보가 없을 때
+			if birth=='?' or death =='?':
+				raise Exception('년도 없음: ' + birth + ' / ' + death)
+	       	value = [name,birth,death,nationality,url]
 	except Exception, e:
 		schName = schName.replace(' ','_')
 		url = 'http://ko.wikipedia.org/wiki/'+schName
-		value = ['0','0',url]
+		value = ['0','0','0','0',url]
 		print '인물 정보 파싱 실패'
        	return value
 
+# 예전 국가를 검색한다.
+def tranNationality(nation):
+	if findString(nation,['조선','고려']):
+		nation = '한국'
+	elif findString(nation,['로마']):
+		nation = '이탈리아'
+	elif findString(nation,['중화인민공화국']):
+		nation = '중국'
+	return nation
+
+
+# 국가를 찾는다.
+def getNationality(nation):
+	nationalities = ['가나','가봉','가이아나','감비아','과테말라','그레나다','그리스','기니','기니비사우','나미비아','나이지리아','남수단','남아프리카공화국','네덜란드','네팔','노르웨이','뉴질랜드','니제르','니카라과','덴마크','도미니카 공화국','도미니카 연방','독일','동티모르','라오스','라이베리아','라트비아','러시아','레바논','레소토','루마니아','룩셈부르크','르완다','리비아','리투아니아','마다가스카르','마셜 제도','마케도니아','말라위','말레이시아','말리','멕시코','모로코','모리셔스','모리타니','모잠비크','몬테네그로','몰도바','몰디브','몰타','몽골','미국','미얀마','바누아투','바레인','바베이도스','바하마','방글라데시','베냉','베네수엘라','베트남','벨기에','벨라루스','벨리즈','보스니아 헤르체고비나','보츠와나','볼리비아','부룬디','부르키나파소','부탄','불가리아','브라질','브루나이','사모아','사우디아라비아','산마리노','상투메프린시페','세네갈','세르비아','세이셸','세인트 루시아','세인트 키츠 네비스','솔로몬 제도','수단','수리남','스리랑카','스와질란드','스웨덴','스위스','스페인','슬로바키아','슬로베니아','시리아','시에라리온','싱가포르','아랍에미리트','아르메니아','아르헨티나','아이슬란드','아이티','아일랜드 공화국','아제르바이잔','아프가니스탄','알바니아','알제리','앙골라','앤티가 바부다','에리트레아','에스토니아','에콰도르','에티오피아','엘살바도르','영국','예멘','오만','오스트리아','온두라스','요르단','우간다','우루과이','우즈베키스탄','우크라이나','이라크','이란','이스라엘','이집트','이탈리아','인도','인도네시아','일본','자메이카','잠비아','적도 기니','조지아','중국','중앙아프리카 공화국','지부티','짐바브웨','차드','체코','칠레','카메룬','카보베르데','카자흐스탄','카타르','캄보디아','캐나다','케냐','코모로','코소보','코스타리카','코트디부아르','콜롬비아','콩고 공화국','콩고 민주 공화국','쿠웨이트','크로아티아','키르기스스탄','키리바시','키프로스','타지키스탄','탄자니아','태국','터키','토고','통가','투르크메니스탄','투발루','튀니지','트리니다드 토바고','파나마','파라과이','파키스탄','파푸아뉴기니','팔라우','페루','포르투갈','폴란드','프랑스','피지','핀란드','필리핀','한국','헝가리','호주','홍콩']
+	for n in nationalities:
+		if nation.find(n) > -1:
+			return n
+	return False
+
 # 인물을 기록한다.
-def addHistory(name,nationality):
+def addHistory(name):
 	# 인물 검사
 	setWorkSheet()
 	value = getinfoWiki(name)
 	wikiname = value[0]
+	url = value[4]
 	result = dict()
 	if wikiname == '0':
 		result['resultCode'] = '3' # 파싱 실패
 		result['resultMsg'] = '위키에서 올바른 데이터를 찾을 수 없습니다. <br/> 여기를 눌러 페이지를 확인하세요' # 파싱 실패
-		result['url'] = value[2] # 파싱 실패
+		result['url'] = url # 파싱 실패
 	else:
 		birth = int(value[1])
 		death = int(value[2])
+		nationality = value[3]
 		if hasDuplication(wikiname):
 			result['resultCode'] = '2' # 중복
 			result['resultMsg'] = str(birth)+'~'+str(death)
 			result['wikiname'] = wikiname
+			result['nationality'] = nationality
 		else:
 			url = 'http://ko.wikipedia.org/wiki/'+wikiname
 			depth = getDepth(nationality,birth,death)
 			addOne(wikiname,birth,death,nationality,depth,'',url)
 			result['resultCode'] = '1' # 성공
 			result['wikiname'] = wikiname
+			result['nationality'] = nationality
 			result['resultMsg'] = str(birth)+'~'+str(death)
+			result['url'] = url # 파싱 실패
 	return result
 
 # 인물 한 명을 더한다.

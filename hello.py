@@ -37,8 +37,7 @@ def claim():
 @app.route("/add", methods=["POST"])
 def add():
 	name = request.form.get('name')
-	nationality = request.form.get('nationality')
-	result =  addHistory(name,nationality)
+	result =  addHistory(name)
 	return json.dumps(result)
 
 #test
@@ -48,7 +47,7 @@ def test(name):
 	return json.dumps(result)
 
 if __name__ == "__main__":
- 	app.run('0.0.0.0',80)
+ 	app.run('0.0.0.0',8080,debug=True)
 
 
 
