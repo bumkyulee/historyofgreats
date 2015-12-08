@@ -738,6 +738,12 @@
 			});
 			// focus in / out 상황에서 스크롤 막기
 			$('#name').focusin(function() { playWheel(); })
+			/*
+			$('#name').keydown(function() {
+				$('#lifetime-form').hide();
+				$('#nationality-form').hide();
+			})
+			*/
 			$('#name').focusout(function() { blockWheel(); })
 			$('#claimtext').focusin(function() { playWheel(); })
 			$('#claimtext').focusout(function() { blockWheel(); })
