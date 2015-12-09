@@ -29,10 +29,6 @@
 	<body>
 		<script type="text/javascript">
 		// 모바일 감지
-		if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-			var msg = '모바일에선 제한적인 UI가 있습니다. \n 링크 잘 두셨다가, 시간되실 때 PC로도 접속 한번 부탁드려요~ :)';
-			alert(msg);
-		}
 		var data = {{ data|tojson }};
 		var items = new Array();
 		var lanes = new Array();
