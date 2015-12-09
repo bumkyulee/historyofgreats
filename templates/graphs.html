@@ -37,7 +37,6 @@
 		var data = {{ data|tojson }};
 		var items = new Array();
 		var lanes = new Array();
-		var isMobile = detectMobile();
 		for (var i = data.length - 1; i > 0; i--) {
 			var arrTemp = new Object();
 			arrTemp['depth'] = Number(data[i][4]);
