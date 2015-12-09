@@ -344,9 +344,23 @@ def getinfoWiki(schName):
 		page = opener.open(url)
 	       	soup = BeautifulSoup(page)
 
-	       	#getFullName
+	       	# 동음이의어 문서 파악
+	       	isNavPage = findString(soup.findAll('div',attrs={'class':'mw-normal-catlinks'})[0].text.encode('utf-8'),['동음이의어','동명이인'])
+	       	if isNavPage:
+	       		maxcount = 3
+	       		namelist = list()
+	       		for a in soup.findAll('a'):
+	       			if a.text.encode('utf-8').find(schName) > -1:
+       					namelist.append(a.text)
+	       				if len(namelist) == maxcount:
+	       					break
+	       		value = ['1',namelist,'0','0',url]
+	       		return value
+
+	       	# 위키 이름
 	       	name = soup.find('h1',attrs={'id':'firstHeading'}).text
 
+	       	# 기본 분석
 	       	birth = False
 		death = False
 		nationality = False
@@ -374,7 +388,7 @@ def getinfoWiki(schName):
 			nationality = '기타'
 		nationality = nationality.decode('utf-8')
 
-		#그래도 출생-사망 년도를 못 찾았으면
+		#그래도 출생-사망 년도를 못 찾았으면 인포 박스를 뒤진다.
 		if not birth or not death:
 		       	#생년월일 찾기
 		       	birth = '?'
@@ -395,13 +409,13 @@ def getinfoWiki(schName):
 		       		if label is not None:
 		       			text = label.text.encode('utf-8')
 			       		if findString(text,birth_strs,birth_strs_not):
-			       			birth = data.td.text.split(u'년')[0]
+			       			birth = int(data.td.text.split(u'년')[0])
 			       		elif findString(text,death_strs,death_strs_not):
-			       			death = data.td.text.split(u'년')[0]
+			       			death = int(data.td.text.split(u'년')[0])
 			       		elif findString(text,birth_special):
 			       			birthdeath = data.td.text.split('~ ')
-			       			birth = birthdeath[0].split(u'년')[0]
-			       			death = birthdeath[1].split(u'년')[0]
+			       			birth = int(birthdeath[0].split(u'년')[0])
+			       			death = int(birthdeath[1].split(u'년')[0])
 			       		else:
 			       			pass
 			#다 돌고 나왔는데 생년 정보가 없을 때
@@ -448,8 +462,13 @@ def addHistory(name):
 	url = value[4]
 	result = dict()
 	if wikiname == '0':
-		result['resultCode'] = '3' # 파싱 실패
-		result['resultMsg'] = '위키에서 올바른 데이터를 찾을 수 없습니다. <br/> 여기를 눌러 페이지를 확인하세요' # 파싱 실패
+		result['resultCode'] = '4' # 파싱 실패
+		result['resultMsg'] = '위키에서 올바른 데이터를 찾을 수 없습니다. <br/> 여기를 눌러 페이지를 확인하세요 <br/>( 참고: 기원전은 지원 안한다는 사실 )' # 파싱 실패
+		result['url'] = url # 파싱 실패
+	elif wikiname =='1':
+		result['resultCode'] = '3'
+		result['resultMsg'] = '올바른 데이터가 없나요? <br/> 여기를 눌러 페이지를 확인하세요' # 파싱 실패
+		result['namelist'] = value[1]
 		result['url'] = url # 파싱 실패
 	else:
 		birth = int(value[1])

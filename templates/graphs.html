@@ -565,6 +565,13 @@
 				      </div>
 				    </div>
 				 </fieldset>
+				<div id="result-fail-maybe" style="text-align: left; display:none; margin: 10px">
+					<p><strong>[ 아래 인물 중 찾는 사람이 있나요? ]</strong></p>
+					<div id="result-fail-maybe-list">
+						<a href="#" class="text-info">blank</a>
+					</div>
+					</p>
+				</div>
 				<p class="text-danger" id="result-fail-duplicate" style="text-align: center; display:none">
 					이미 있는 이름입니다 [
 					<span id="searchname" style="color:gray;">홍길동</span>
@@ -687,6 +694,7 @@
 			function addInit(){
 				$('#result-fail-duplicate').hide();
 				$('#result-fail-noresult-p').hide();
+				$('#result-fail-maybe').hide();
 				$('#lifetime-form').hide();
 				$('#progress-bar-add').hide();
 				$('#result-success-add').hide();
@@ -739,16 +747,19 @@
 			});
 			// focus in / out 상황에서 스크롤 막기
 			$('#name').focusin(function() { playWheel(); })
-			/*
-			$('#name').keydown(function() {
-				$('#lifetime-form').hide();
-				$('#nationality-form').hide();
-			})
-			*/
 			$('#name').focusout(function() { blockWheel(); })
 			$('#claimtext').focusin(function() { playWheel(); })
 			$('#claimtext').focusout(function() { blockWheel(); })
 
+			// 예상 되는 사람 리스팅
+			function setExpectations(namelist){
+				var listhtml = '<ul>';
+				for (var i = namelist.length - 1; i >= 0; i--) {
+					listhtml += '<li><a href=\"javascript:$(\'#name\').val(\''+namelist[i]+'\')\" class="text-info">'+namelist[i]+'</a></li>';
+				};
+				listhtml += '</ul>';
+				$("#result-fail-maybe-list").html(listhtml);
+			}
 			// 추가하기 결과 메시지 초기화
 			function sendAddResultInit(){
 				// 성공
@@ -758,6 +769,8 @@
 				$('#result-fail-duplicate').hide();
 				// 실패
 				$('#result-fail-noresult-p').hide();
+				// 실패 - 이 중에 결과가 있나요?
+				$('#result-fail-maybe').hide();
 			}
 			// 추가하기 클릭
 			function sendAdd(){
@@ -796,9 +809,17 @@
 						  $('#nationality-form').show();
 						  $('#nationality').val(data['nationality']);
 						  $('#btn-save').text('다시하기');
-						   $('#btn-save').attr('onclick', ' addInit()');
+						  $('#btn-save').attr('onclick', ' addInit()');
 				            	  }
-				            	  else{
+				            	  else if (resultCode == '3') {
+				            	  	sendAddResultInit();
+				            	  	$('#result-fail-maybe').show();
+				            	  	setExpectations(data['namelist']);
+				            	  	$('#result-fail-noresult-p').show();
+				            	  	$('#result-fail-noresult').html(data['resultMsg']);
+				            	  	$('#result-fail-noresult').attr('href',data['url']);
+				            	  }
+				            	  else {
 				            	  	sendAddResultInit();
 				            	  	$('#result-fail-noresult-p').show();
 				            	  	$('#result-fail-noresult').html(data['resultMsg']);
