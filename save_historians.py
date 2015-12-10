@@ -364,65 +364,48 @@ def getinfoWiki(schName):
 	       	birth = False
 		death = False
 		nationality = False
-		for a in soup.findAll('a'):
-			a = a.text.encode('utf-8')
-			if nationality == False:
-				temp = getNationality(a)
-				if temp:
-					nationality = tranNationality(temp)
-					break
-
 		for p in soup.findAll('p'):
 			if p.b is not None and p.text.find('~') > -1:
-				p = BeautifulSoup(str(p).split('. ')[0])
+				# 국가 찾기
 				for a in p.findAll('a'):
 					a = a.text.encode('utf-8')
-					if findString(a,['년']):
-						if not birth:
-							birth = int(a.split('년')[0])
-						elif not death:
-							death = int(a.split('년')[0])
-						if birth and death:
+					if nationality == False:
+						temp = getNationality(a)
+						if temp:
+							nationality = tranNationality(temp)
 							break
+
+				# 생년 찾기
+				p = str(p).split('. ')[0]
+				start = p.find('(')
+				end = start + 1500
+				r = p[start:end]
+				# 출생년도 찾기
+				r_birth = str(r).split('~')[0]
+				for a in BeautifulSoup(r_birth).findAll('a'):
+					a = a.text.encode('utf-8')
+					if findString(a,['년']):
+						birth = int(a.split('년')[0])
+						break
+				# 사망년도 찾기
+				r_death = str(r).split('~')[1]
+				for a in BeautifulSoup(r_death).findAll('a'):
+					a = a.text.encode('utf-8')
+					if findString(a,['년']):
+						death = int(a.split('년')[0])
+						break
+				break
+
+		# 생존하고 있는 사람
+		if birth and not death:
+			death = 2099
+		elif not birth and not death:
+			raise Exception
 
 		# 국가 디폴트 설정
 		if not nationality:
 			nationality = '기타'
 		nationality = nationality.decode('utf-8')
-
-		#그래도 출생-사망 년도를 못 찾았으면 인포 박스를 뒤진다.
-		if not birth or not death:
-		       	#생년월일 찾기
-		       	birth = '?'
-		       	death = '?'
-
-		       	birth_strs = ['출생','출생일']
-		       	birth_strs_not = ['출생지']
-
-		       	death_strs = ['사망','사망일']
-			death_strs_not = ['사망지']
-
-			birth_special = ['생애']
-
-	       		infobox = soup.findAll('tr')
-		       	#InfoBox parsing
-		       	for data in infobox:
-		       		label = data.th
-		       		if label is not None:
-		       			text = label.text.encode('utf-8')
-			       		if findString(text,birth_strs,birth_strs_not):
-			       			birth = int(data.td.text.split(u'년')[0])
-			       		elif findString(text,death_strs,death_strs_not):
-			       			death = int(data.td.text.split(u'년')[0])
-			       		elif findString(text,birth_special):
-			       			birthdeath = data.td.text.split('~ ')
-			       			birth = int(birthdeath[0].split(u'년')[0])
-			       			death = int(birthdeath[1].split(u'년')[0])
-			       		else:
-			       			pass
-			#다 돌고 나왔는데 생년 정보가 없을 때
-			if birth=='?' or death =='?':
-				raise Exception('년도 없음: ' + birth + ' / ' + death)
 
 	       	value = [name,birth,death,nationality,url]
 	except Exception, e:
