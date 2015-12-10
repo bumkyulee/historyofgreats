@@ -384,9 +384,6 @@ def getinfoWiki(schName):
 							death = int(a.split('년')[0])
 						if birth and death:
 							break
-		# 사망일이 없을 때(현재까지 살아있을 때)
-		if birth and not death:
-			death = 2099
 
 		# 국가 디폴트 설정
 		if not nationality:
