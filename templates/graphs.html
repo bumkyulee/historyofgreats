@@ -119,6 +119,7 @@
 		    g = d.getElementsByTagName('body')[0],
 		    screenWidth = w.innerWidth || e.clientWidth || g.clientWidth,
 		    screenHeight = w.innerHeight|| e.clientHeight|| g.clientHeight;
+		    freespace = 50;
 
 		    screenWidth = 4000;
 		    screenHeight = 18*getSumMaxDepth();
@@ -367,7 +368,7 @@
 				    <div class="form-group">
 				      <label for="name" class="col-lg-2 control-label">이름</label>
 				      <div class="col-lg-10">
-				        <input type="text" class="form-control" id="name" placeholder="홍길동">
+				        <input type="text" class="form-control" id="name" placeholder="홍길동" onkeydown="javascript:addKeyCheck()">
 				      </div>
 				    </div>
 				    <div class="form-group" id="lifetime-form" style="display:none">
@@ -643,7 +644,9 @@
 				<div id="progress-bar-claim" class="progress progress-striped active" style = "display:none; height:15px;">
 				  <div class="progress-bar" style="width: 100%; display:table;">
 				  	<div style="display:table-cell; vertical-align:middle;">
-				  		<span id="progress-bar-msg-claim" style="font-size:12px;">서버통신중입니다</span>
+				  		<a href="http://bit.ly/1R2tZU8" target="_blank">
+				  			<span id="progress-bar-msg-claim" style="font-size:12px; color:white">서버통신중입니다</span>
+				  		</a>
 				 	</div>
 				  </div>
 				</div>
@@ -657,12 +660,15 @@
 			  </div>
 		</div>
 		<!-- 아래 빈 여백 -->
-		<div style="height:60px"></div>
+		<div id="freespace" style=""></div>
 		<script>
+			// 빈 여백
+			$('#freespace').height(freespace);
+
 			// 마스크 띄우기
 			function maskOpen(){
 			        //마스크의 높이와 너비를 화면 것으로 만들어 전체 화면을 채운다.
-			        $('#mask').css({'width':screenWidth,'height':screenHeight});
+			        $('#mask').css({'width':screenWidth,'height':(screenHeight+freespace)});
 
 			        //애니메이션 효과
 			        $('#mask').fadeTo("slow",0.3);
@@ -709,7 +715,11 @@
 				$('#btn-save').text('추가하기');
 				$('#btn-save').attr('onclick', 'sendAdd()');
 			}
-			function addWarning(searchname){
+			function addKeyCheck(){
+				if(event.keyCode == 13){
+					sendAdd();
+					return;
+				}
 			}
 			function claimOpen(){
 			        // 모든 창 닫기
@@ -779,9 +789,12 @@
 				$('#result-fail-maybe').hide();
 			}
 			// 추가하기 클릭
+			var add_blockdouble = false;
 			function sendAdd(){
 				var name = $('#name').val();
 				if (name == '') { alert('값이 없습니다'); return }
+				if (add_blockdouble) { alert('지루하신가요?\n기다리는동안 로딩바를 누르면 히든페이지로 이동합니다.'); return; }
+				add_blockdouble = true;
 				$('#progress-bar-add').show();
 				$.ajax({
 				            url: '/add',
@@ -832,6 +845,7 @@
 				            	  	$('#result-fail-noresult').attr('href',data['url']);
 				            	  }
 					  $('#progress-bar-add').hide();
+					  add_blockdouble = false;
 					  console.log(data);
 				            },
 				            error: function(error) {
@@ -840,10 +854,13 @@
 				        });
 			}
 			// Ajax - 문의하기 버튼
+			var claim_blockdouble = false;
 			function sendClaim(){
 				var claimtype = $('#claimtype').val();
 				var claimtext = $('#claimtext').val();
 				$('#progress-bar-claim').show();
+				if(claim_blockdouble) { alert('지루하신가요?\n기다리는동안 로딩바를 누르면 히든페이지로 이동합니다.'); return; }
+				claim_blockdouble = true;
 				$.ajax({
 				            url: '/claim',
 				            type: 'post',
@@ -861,6 +878,7 @@
 				            	  else {
 				            	  	alert(data['resultMsg']);
 				            	  }
+				            	  claim_blockdouble = false;
 				            },
 				            error: function(error) {
 				                alert('서버 통신 실패');

@@ -374,6 +374,7 @@ def getinfoWiki(schName):
 
 		for p in soup.findAll('p'):
 			if p.b is not None and p.text.find('~') > -1:
+				p = BeautifulSoup(str(p).split('. ')[0])
 				for a in p.findAll('a'):
 					a = a.text.encode('utf-8')
 					if findString(a,['년']):
@@ -383,7 +384,11 @@ def getinfoWiki(schName):
 							death = int(a.split('년')[0])
 						if birth and death:
 							break
+		# 사망일이 없을 때(현재까지 살아있을 때)
+		if birth and not death:
+			death = 2099
 
+		# 국가 디폴트 설정
 		if not nationality:
 			nationality = '기타'
 		nationality = nationality.decode('utf-8')
@@ -432,7 +437,7 @@ def getinfoWiki(schName):
 
 # 예전 국가를 검색한다.
 def tranNationality(nation):
-	if findString(nation,['조선','고려','고구려','신라','백제']):
+	if findString(nation,['조선','고려','고구려','신라','백제','대한']):
 		nation = '한국'
 	elif findString(nation,['로마']):
 		nation = '이탈리아'
@@ -444,10 +449,9 @@ def tranNationality(nation):
 # 국가를 찾는다.
 def getNationality(nation):
 	nationalities = ['가나','가봉','가이아나','감비아','과테말라','그레나다','그리스','기니','기니비사우','나미비아','나이지리아','남수단','남아프리카공화국','네덜란드','네팔','노르웨이','뉴질랜드','니제르','니카라과','덴마크','도미니카 공화국','도미니카 연방','독일','동티모르','라오스','라이베리아','라트비아','러시아','레바논','레소토','루마니아','룩셈부르크','르완다','리비아','리투아니아','마다가스카르','마셜 제도','마케도니아','말라위','말레이시아','말리','멕시코','모로코','모리셔스','모리타니','모잠비크','몬테네그로','몰도바','몰디브','몰타','몽골','미국','미얀마','바누아투','바레인','바베이도스','바하마','방글라데시','베냉','베네수엘라','베트남','벨기에','벨라루스','벨리즈','보스니아 헤르체고비나','보츠와나','볼리비아','부룬디','부르키나파소','부탄','불가리아','브라질','브루나이','사모아','사우디아라비아','산마리노','상투메프린시페','세네갈','세르비아','세이셸','세인트 루시아','세인트 키츠 네비스','솔로몬 제도','수단','수리남','스리랑카','스와질란드','스웨덴','스위스','스페인','슬로바키아','슬로베니아','시리아','시에라리온','싱가포르','아랍에미리트','아르메니아','아르헨티나','아이슬란드','아이티','아일랜드 공화국','아제르바이잔','아프가니스탄','알바니아','알제리','앙골라','앤티가 바부다','에리트레아','에스토니아','에콰도르','에티오피아','엘살바도르','영국','예멘','오만','오스트리아','온두라스','요르단','우간다','우루과이','우즈베키스탄','우크라이나','이라크','이란','이스라엘','이집트','이탈리아','인도','인도네시아','일본','자메이카','잠비아','적도 기니','조지아','중국','중앙아프리카 공화국','지부티','짐바브웨','차드','체코','칠레','카메룬','카보베르데','카자흐스탄','카타르','캄보디아','캐나다','케냐','코모로','코소보','코스타리카','코트디부아르','콜롬비아','콩고 공화국','콩고 민주 공화국','쿠웨이트','크로아티아','키르기스스탄','키리바시','키프로스','타지키스탄','탄자니아','태국','터키','토고','통가','투르크메니스탄','투발루','튀니지','트리니다드 토바고','파나마','파라과이','파키스탄','파푸아뉴기니','팔라우','페루','포르투갈','폴란드','프랑스','피지','핀란드','필리핀','한국','헝가리','호주','홍콩']
-	nationalities += ['조선','고려','고구려','신라','백제']
+	nationalities += ['조선','고려','고구려','신라','백제','대한']
 	nationalities += ['로마']
 	nationalities += ['중화인민공화국']
-	nationalities += ['대한']
 	for n in nationalities:
 		if nation.find(n) > -1:
 			return n
@@ -476,7 +480,7 @@ def addHistory(name):
 		nationality = value[3]
 		if hasDuplication(wikiname):
 			result['resultCode'] = '2' # 중복
-			result['resultMsg'] = str(birth)+'~'+str(death)
+			result['resultMsg'] = str(birth)+'~'+ ( str(death) if death < 2016 else '현재' )
 			result['wikiname'] = wikiname
 			result['nationality'] = nationality
 		else:
@@ -486,7 +490,7 @@ def addHistory(name):
 			result['resultCode'] = '1' # 성공
 			result['wikiname'] = wikiname
 			result['nationality'] = nationality
-			result['resultMsg'] = str(birth)+'~'+str(death)
+			result['resultMsg'] = str(birth)+'~'+ ( str(death) if death < 2016 else '현재' )
 			result['url'] = url # 파싱 실패
 	return result
 
