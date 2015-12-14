@@ -12,6 +12,7 @@ from BeautifulSoup import BeautifulSoup
 import random
 import string
 import sys
+import re
 
 from pymongo import MongoClient
 
@@ -380,20 +381,16 @@ def getinfoWiki(schName):
 				start = p.find('(')
 				end = start + 1500
 				r = p[start:end]
-				# 출생년도 찾기
+				# 텍스트로 찾기
+				regex =  re.compile('\d{1,4}년')
 				r_birth = str(r).split('~')[0]
-				for a in BeautifulSoup(r_birth).findAll('a'):
-					a = a.text.encode('utf-8')
-					if findString(a,['년']):
-						birth = int(a.split('년')[0])
-						break
-				# 사망년도 찾기
 				r_death = str(r).split('~')[1]
-				for a in BeautifulSoup(r_death).findAll('a'):
-					a = a.text.encode('utf-8')
-					if findString(a,['년']):
-						death = int(a.split('년')[0])
-						break
+				birthlist = regex.findall(r_birth)
+				if len(birthlist) > 0:
+					birth = int(birthlist[0].split('년')[0])
+				deathlist = regex.findall(r_death)
+				if len(deathlist) > 0:
+					death = int(deathlist[0].split('년')[0])
 				break
 
 		# 생존하고 있는 사람
