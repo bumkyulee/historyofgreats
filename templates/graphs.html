@@ -311,7 +311,7 @@
 
 			labels.enter()
 				.append("text")
-				.text(function(d) {return d.id + " (" + d.start + "~"+d.end+") ";})
+				.text(function(d) {return d.id + " (" + d.start + "~"+ (d.end == '2099' ? '현재' : d.end) +") ";})
 				.attr("x", function(d) {return x1(Math.max(d.start+2, minExtent));})
 				.attr("y", function(d) {return mainHeightUnit*(getSumBeginDepth(d.lane)+d.depth-0.25);  })
 				.attr("text-anchor", "start")

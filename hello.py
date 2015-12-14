@@ -52,6 +52,8 @@ def claim():
 def add():
 	name = request.form.get('name')
 	result =  addHistory(name)
+	if result['resultCode'] == '1':
+		app.cache.delete('main')
 	return json.dumps(result)
 
 #Flush Cache
