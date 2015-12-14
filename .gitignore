@@ -12,3 +12,6 @@ API Project-43d918462212.json
 
 # pyc files
 *.pyc
+
+# cache
+cache-dir

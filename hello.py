@@ -11,10 +11,20 @@ import urllib2
 from BeautifulSoup import BeautifulSoup
 import random
 from flask import request
+from flask.ext.cache import Cache
 
 from save_historians import *
+import time
+import random
 
 app = Flask(__name__)
+app.config['CACHE_TYPE'] = 'simple'
+app.cache = Cache(app, config={
+         'CACHE_TYPE': 'filesystem',
+         'CACHE_DIR': 'cache-dir',
+         'CACHE_DEFAULT_TIMEOUT': 922337203685477580,
+         'CACHE_THRESHOLD': 922337203685477580
+     })
 
 @app.route("/")
 def main():
@@ -22,10 +32,14 @@ def main():
 
 @app.route("/historyofgreats")
 def historyofgreats():
+	cached = app.cache.get('main')
+	if cached:
+		return cached
 	worksheet = setWorkSheet()
 	data = worksheet.get_all_values()
-
-	return render_template('graphs.html',data=data)
+	result = render_template('graphs.html',data=data)
+	app.cache.set('main', result)
+	return result
 
 @app.route("/claim", methods=["POST"])
 def claim():
@@ -39,6 +53,12 @@ def add():
 	name = request.form.get('name')
 	result =  addHistory(name)
 	return json.dumps(result)
+
+#Flush Cache
+@app.route("/cache_flush/<key_name>")
+def cache_flush(key_name):
+	app.cache.delete(key_name)
+	return 'Done: [ ' + key_name + ' ] is Deleted'
 
 #test
 @app.route("/test/<name>")
