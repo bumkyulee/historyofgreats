@@ -396,7 +396,9 @@ def getinfoWiki(schName):
 		# 생존하고 있는 사람
 		if birth and not death:
 			death = 2099
-		elif not birth and not death:
+
+		# 그래도 출생 - 사망 년도를 못 찾았다면
+		if not birth and not death:
 			raise Exception
 
 		# 국가 디폴트 설정
@@ -444,7 +446,7 @@ def addHistory(name):
 	result = dict()
 	if wikiname == '0':
 		result['resultCode'] = '4' # 파싱 실패
-		result['resultMsg'] = '위키에서 올바른 데이터를 찾을 수 없습니다. <br/> 여기를 눌러 페이지를 확인하세요 <br/>( 참고: 기원전은 지원 안한다는 사실 )' # 파싱 실패
+		result['resultMsg'] = '위키에서 올바른 데이터를 찾을 수 없습니다. <br/> 여기를 눌러 페이지를 확인하세요 <br/>( 참고: 기원전 및 위키양식에 어긋나는 문서는 제외합니다. )' # 파싱 실패
 		result['url'] = url # 파싱 실패
 	elif wikiname =='1':
 		result['resultCode'] = '3'
